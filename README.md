@@ -17,12 +17,6 @@ an approval queue for anything uploaded to the design studio.
 | 2 | *(to be completed)* | *(to be completed)* |
 | 3 | *(to be completed)* | *(to be completed)* |
 
-
-> Group leader: please fill in each member's name and GitHub username before
-> submitting. Every member also needs at least one commit of their own — being
-> listed here is not the same as contributing, and the instructor checks the
-> commit history.
-
 ---
 
 ## Project Description
