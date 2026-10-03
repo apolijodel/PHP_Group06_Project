@@ -1,0 +1,194 @@
+/* =====================================================================
+   MarkMe - dark.css
+
+   Dark mode: the token overrides and the transition that makes the swap
+   smooth. Loaded last so it wins over every component above it, which is
+   what a theme is supposed to do.
+
+   Part of a split stylesheet. The files load in this order and must stay
+   in it: variables, base, components, customer, admin, auth, responsive,
+   overrides, dark.
+   ===================================================================== */
+
+/* ========================= 24. Dark theme ================================
+   Set by includes/header.php / admin_header.php from localStorage before
+   paint, so there is no flash of the light theme on load.
+
+   This is a re-theme, not an inversion: the page stays warm (brown-black
+   rather than blue-black), cards stay a shade above the page, and the brand
+   orange/green keep their jobs. Only tokens change — no component rule
+   below needs a dark variant, because the role tokens declared in §1 already
+   separate "text" from "fill".
+   ======================================================================== */
+:root[data-theme="dark"] {
+  /* Surfaces — warm, never pure black */
+  --cream: #15130f;
+  --cream-2: #1c1913;
+  --surface: #221e18;
+
+  /* Dark chrome stays dark, but lifts off the page so it stays legible */
+  --ink-surface: #2c2720;
+  --on-ink: #f4efe5;
+
+  /* Ink inverts */
+  --ink: #f4efe5;
+  --ink-2: #c7bfb1;
+  --ink-3: #988f80;
+
+  /* Lines */
+  --border: #332e25;
+  --border-2: #463f33;
+  --row-hover: #2b2620;
+  --hover-surface: #332e26;
+
+  --btn-outline-border: #4a4336;
+
+  --accent-border: #4d3320;
+  --green-border: #2b4a3f;
+  --danger-border: #4d2e20;
+
+  /* Brand fills are deliberately unchanged: #bd5518 and #2f6f5e already
+     carry white label text at AA, and they read well on a dark page. */
+
+  /* Tints become dark tints so tinted badges/alerts stay readable */
+  --accent-050: #2f2015;
+  --green-050: #16261f;
+  --danger-050: #2e1a12;
+  --warn-050: #2c2415;
+
+  /* Accent *text* has to lighten — dark orange on a dark page is unreadable */
+  --accent-text: #f0a066;
+  --green-text: #7fcdb2;
+  --green-ink: #7fcdb2;
+  --danger: #ef9d7e;
+  --warn: #e3bb63;
+  --gold: #e0b45c;
+
+  /* Sticky bars and overlay chips follow the dark surface */
+  --bar-bg: rgba(26, 23, 18, 0.92);
+  --chip-bg: rgba(40, 35, 28, 0.94);
+
+  /* Elevation needs real black to register against a dark surface */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 18px 44px rgba(0, 0, 0, 0.6);
+
+  /* Bootstrap bridge */
+  --bs-body-color: var(--ink);
+  --bs-border-color: var(--border);
+  --bs-link-color: #7fcdb2;
+  --bs-link-hover-color: #a3ddc8;
+}
+
+/* Bootstrap's info badge hardcodes a pale blue pair. */
+:root[data-theme="dark"] .badge.bg-info {
+  background: #1d2e36 !important;
+  color: #8fc3d8 !important;
+}
+
+/* The decorative "paper" bookmark keeps a light fill, so its text must stay
+   dark rather than following --ink. */
+:root[data-theme="dark"] .story-media .bookmark-row .bookmark:nth-child(2) {
+  color: #1f1d1a;
+}
+
+/* Bootstrap paints form controls and modals from its own variables. */
+:root[data-theme="dark"] .modal-content,
+:root[data-theme="dark"] .form-control,
+:root[data-theme="dark"] .form-select {
+  background-color: var(--surface);
+  color: var(--ink);
+}
+:root[data-theme="dark"] .form-control:disabled,
+:root[data-theme="dark"] .form-control[readonly] {
+  background-color: var(--cream-2);
+}
+:root[data-theme="dark"] .btn-close {
+  filter: invert(1) grayscale(1) brightness(1.6);
+}
+
+/* Native controls (date pickers, scrollbars, autofill) follow this. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* ---- Theme toggle control ---- */
+.theme-toggle {
+  display: inline-flex;
+  padding: 4px;
+  gap: 4px;
+  background: var(--cream-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+}
+.theme-toggle button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 0;
+  background: none;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.45rem 0.95rem;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  transition:
+    background var(--t-fast),
+    color var(--t-fast);
+}
+.theme-toggle button:hover {
+  color: var(--ink);
+}
+.theme-toggle button[aria-pressed="true"] {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-xs);
+}
+.theme-toggle svg {
+  flex: none;
+}
+
+/* ================= 34. Dark mode: smooth, not a flash ==================
+   The theme swap changes tokens, so without this every surface repaints in
+   one frame. Transitioning the properties that actually differ between the
+   themes makes it a fade rather than a jump.
+
+   Scoped to a class the script adds for the duration of the switch, so it
+   never slows down ordinary hovers, and never animates on first paint (which
+   would itself look like a flash).
+   ======================================================================== */
+.theme-anim,
+.theme-anim *,
+.theme-anim *::before,
+.theme-anim *::after {
+  transition:
+    background-color 0.32s ease,
+    border-color 0.32s ease,
+    color 0.32s ease,
+    fill 0.32s ease,
+    stroke 0.32s ease,
+    box-shadow 0.32s ease !important;
+  transition-delay: 0s !important;
+}
+
+/* Transforms and opacity must keep their own timing — sweeping them into the
+   rule above would make drawers and toasts animate on a theme change. */
+.theme-anim .cart-drawer,
+.theme-anim .drawer-scrim,
+.theme-anim .carousel-track,
+.theme-anim .toast-item {
+  transition-property:
+    background-color, border-color, color, box-shadow, transform, opacity !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-anim,
+  .theme-anim *,
+  .theme-anim *::before,
+  .theme-anim *::after {
+    transition: none !important;
+  }
+}

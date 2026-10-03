@@ -1,0 +1,206 @@
+/* =====================================================================
+   MarkMe - overrides.css
+
+   The two correction layers, kept last on purpose.
+
+   These sections exist specifically to override rules in the files above
+   them - integration fixes and visual QA corrections found after those
+   files were written. Everything else that used to live here has moved to
+   the file it belongs to; only what must cascade last stayed.
+
+   Part of a split stylesheet. The files load in this order and must
+   stay in it: variables, base, components, customer, admin, auth,
+   responsive, overrides.
+   ===================================================================== */
+
+/* ======================= 21. Post-integration fixes ====================== */
+
+/* Admin login wordmark sits on one baseline with its "Admin" tag. */
+.admin-login-card .brand-mark small {
+  align-self: center;
+}
+
+/* Product-card headings inherit the display face; keep links inheriting it. */
+.product-name a,
+.cart-item-name a {
+  font-family: inherit;
+}
+
+/* Tables inside a data-card scroll horizontally without clipping the radius. */
+.data-card .table-responsive {
+  border-radius: inherit;
+}
+
+/* Bootstrap's dismiss button aligns to the icon+text alert rows. */
+.alert-dismissible {
+  padding-right: 3rem;
+}
+.alert .btn-close {
+  padding: 1rem;
+}
+
+/* Empty states inside a table cell should not inherit cell padding twice. */
+.table .empty-state {
+  padding-block: var(--s-8);
+}
+
+/* Forms used as a sidebar panel keep the panel rhythm. */
+.summary-card form .field-group:last-of-type {
+  margin-bottom: var(--s-4);
+}
+
+/* Keep the sticky summary from overlapping the sticky header on short pages. */
+.summary-card,
+.preview-panel,
+
+/* Avatars rendered inline in admin tables. */
+.table .avatar {
+  text-transform: uppercase;
+}
+
+/* Inline icons sit on the text baseline wherever they appear. */
+.mm-icon {
+  display: inline-block;
+  vertical-align: -0.15em;
+  flex: none;
+}
+.btn .mm-icon,
+.pill .mm-icon,
+.stock-line .mm-icon {
+  vertical-align: middle;
+}
+
+/* ===================== 22. Visual QA corrections ======================== */
+
+/* The story panel's bookmarks are plain .bookmark elements (no a/b/c
+   modifier), so they need their own fills to read against the green. */
+.story-media .bookmark-row .bookmark:nth-child(1) {
+  background: linear-gradient(165deg, #e6b761, var(--gold));
+}
+.story-media .bookmark-row .bookmark:nth-child(2) {
+  background: linear-gradient(165deg, #f3ece0, #ddd0ba);
+  color: var(--ink);
+}
+.story-media .bookmark-row .bookmark:nth-child(2)::before {
+  border-color: rgba(31, 29, 26, 0.18);
+}
+.story-media .bookmark-row .bookmark:nth-child(3) {
+  background: linear-gradient(165deg, #e88b52, var(--accent-600));
+}
+
+/* Card actions stack so labels never wrap and every card ends the same
+   height regardless of how long the button text is. */
+.product-actions {
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.product-actions .btn {
+  width: 100%;
+  white-space: nowrap;
+}
+/* Primary action reads first. */
+.product-actions .btn-primary,
+.product-actions form {
+  order: -1;
+}
+.product-actions form {
+  width: 100%;
+}
+
+/* Outlined buttons need a border you can actually see on cream. */
+.btn-secondary,
+.btn-outline-primary,
+.btn-outline-secondary,
+.btn-outline-dark {
+  --bs-btn-border-color: var(--btn-outline-border);
+  border-color: var(--btn-outline-border);
+  background: var(--surface);
+}
+.btn-secondary:hover,
+.btn-outline-primary:hover,
+.btn-outline-secondary:hover,
+.btn-outline-dark:hover {
+  background: var(--ink-surface);
+  border-color: var(--ink-surface);
+  color: var(--on-ink);
+}
+
+/* Overlay flags must fit the card at every grid width. */
+.product-flags {
+  gap: var(--s-2);
+}
+.product-flags .badge-cat {
+  max-width: 68%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+}
+.product-flags .badge-ok {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  justify-content: center;
+  flex: none;
+}
+
+/* Story panel reads better with the bookmarks filling more of the frame. */
+.story-media .bookmark {
+  width: 92px;
+  height: 232px;
+  font-size: 0.72rem;
+  padding-bottom: 2rem;
+}
+.story-media .bookmark-row {
+  gap: var(--s-4);
+}
+
+/* Auth actions live in the header on tablet and up, and in the nav drawer on
+   phones where there is no room for them beside the brand and icons. */
+.nav-auth-only {
+  display: none;
+}
+
+@media (max-width: 575.98px) {
+  .site-header-inner {
+    gap: var(--s-2);
+  }
+  .brand-mark {
+    font-size: 1.15rem;
+  }
+  .header-actions .divider-v {
+    display: none;
+  }
+  .header-actions .header-auth {
+    display: none;
+  }
+  .nav-auth-only {
+    display: block;
+  }
+  .nav-auth-only + .nav-auth-only a {
+    font-weight: 600;
+    color: var(--accent-text);
+  }
+  .site-nav .nav-auth-only:first-of-type {
+    border-top: 1px solid var(--border);
+    margin-top: var(--s-2);
+    padding-top: var(--s-2);
+  }
+}
+
+/* A horizontally scrolled table must contain its absolutely positioned
+   descendants (e.g. Bootstrap's .visually-hidden headers), or they escape the
+   scroll container and stretch the page instead. */
+.table-responsive {
+  position: relative;
+  max-width: 100%;
+}
+
+/* Grid children default to min-width:auto, which lets wide content push the
+   track wider than the viewport. */
+.cart-grid > *,
+.checkout-grid > *,
+.studio-grid > *,
+.pdp-grid > * {
+  min-width: 0;
+}

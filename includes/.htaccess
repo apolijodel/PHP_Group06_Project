@@ -1,0 +1,5 @@
+# Server-side includes: auth, security, business logic.
+#
+# Nothing in this directory is meant to be fetched over HTTP. The files are
+# included by PHP from the filesystem, which .htaccess does not affect.
+Require all denied

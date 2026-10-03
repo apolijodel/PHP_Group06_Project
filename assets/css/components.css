@@ -1,0 +1,1034 @@
+/* =====================================================================
+   MarkMe - components.css
+
+   The reusable pieces - buttons, forms, cards, badges, alerts, tables.
+   Anything used on both the storefront and the back office.
+
+   Part of a split stylesheet. The files load in this order and must
+   stay in it: variables, base, components, customer, admin, auth,
+   responsive, overrides.
+   ===================================================================== */
+
+/* ============================ 4. Buttons ================================= */
+.btn {
+  --bs-btn-border-radius: var(--r-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--r-md);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  padding: 0.68rem 1.25rem;
+  border: 1px solid transparent;
+  transition:
+    background-color var(--t-fast),
+    border-color var(--t-fast),
+    color var(--t-fast),
+    box-shadow var(--t-fast),
+    transform var(--t-fast);
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn svg {
+  flex: none;
+}
+
+.btn-lg {
+  padding: 0.9rem 1.7rem;
+  font-size: 1rem;
+  border-radius: var(--r-md);
+}
+.btn-sm {
+  padding: 0.42rem 0.85rem;
+  font-size: 0.85rem;
+  border-radius: var(--r-sm);
+}
+.btn-block {
+  width: 100%;
+}
+
+/* Primary — the only orange button on any given screen */
+.btn-primary {
+  --bs-btn-bg: var(--accent-600);
+  --bs-btn-border-color: var(--accent-600);
+  --bs-btn-color: #fff;
+  --bs-btn-hover-bg: var(--accent-700);
+  --bs-btn-hover-border-color: var(--accent-700);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-bg: var(--accent-700);
+  --bs-btn-active-border-color: var(--accent-700);
+  --bs-btn-disabled-bg: var(--accent-600);
+  --bs-btn-disabled-border-color: var(--accent-600);
+  box-shadow: var(--shadow-xs);
+}
+.btn-primary:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+/* Secondary — outlined, for the calmer of two choices */
+.btn-secondary,
+.btn-outline-primary,
+.btn-outline-secondary,
+.btn-outline-dark {
+  --bs-btn-bg: transparent;
+  --bs-btn-color: var(--ink);
+  --bs-btn-border-color: var(--border-2);
+  --bs-btn-hover-bg: var(--ink);
+  --bs-btn-hover-border-color: var(--ink);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-bg: var(--ink);
+  --bs-btn-active-border-color: var(--ink);
+  --bs-btn-active-color: #fff;
+  /* Without these, a disabled secondary button fell back to Bootstrap's own
+     solid grey (#6c757d) - a slab that belongs to neither theme. Disabled
+     should look like the button it is, just muted, which the opacity rule
+     further down already handles. */
+  --bs-btn-disabled-bg: transparent;
+  --bs-btn-disabled-border-color: var(--border-2);
+  --bs-btn-disabled-color: var(--ink-2);
+}
+/* On dark or tinted panels the outline needs a solid backdrop */
+.btn-on-dark {
+  --bs-btn-bg: rgba(255, 255, 255, 0.08);
+  --bs-btn-color: #fff;
+  --bs-btn-border-color: rgba(255, 255, 255, 0.4);
+  --bs-btn-hover-bg: #fff;
+  --bs-btn-hover-border-color: #fff;
+  --bs-btn-hover-color: var(--ink);
+}
+
+.btn-green {
+  --bs-btn-bg: var(--green);
+  --bs-btn-border-color: var(--green);
+  --bs-btn-color: #fff;
+  --bs-btn-hover-bg: var(--green-700);
+  --bs-btn-hover-border-color: var(--green-700);
+  --bs-btn-hover-color: #fff;
+}
+.btn-dark,
+.btn-success {
+  --bs-btn-bg: var(--ink-surface);
+  --bs-btn-border-color: var(--ink-surface);
+  --bs-btn-color: #fff;
+  --bs-btn-hover-bg: #000;
+  --bs-btn-hover-border-color: #000;
+  --bs-btn-hover-color: #fff;
+}
+.btn-outline-success {
+  --bs-btn-color: var(--green-text);
+  --bs-btn-border-color: var(--green);
+  --bs-btn-bg: transparent;
+  --bs-btn-hover-bg: var(--green);
+  --bs-btn-hover-border-color: var(--green);
+  --bs-btn-hover-color: #fff;
+}
+/* A solid destructive button, in MarkMe's own danger colour rather than
+   Bootstrap's red. Used for the confirm step of a deletion, where the
+   action needs to read as the serious one on the dialog. */
+.btn-danger {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--danger);
+  --bs-btn-border-color: var(--danger);
+  --bs-btn-hover-bg: #8a3616;
+  --bs-btn-hover-border-color: #8a3616;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-bg: #8a3616;
+  --bs-btn-active-border-color: #8a3616;
+  --bs-btn-disabled-bg: var(--danger);
+  --bs-btn-disabled-border-color: var(--danger);
+  --bs-btn-disabled-color: #fff;
+}
+
+.btn-outline-danger,
+.btn-danger-quiet {
+  --bs-btn-color: var(--danger);
+  --bs-btn-border-color: var(--border-2);
+  --bs-btn-bg: transparent;
+  --bs-btn-hover-bg: var(--danger-050);
+  --bs-btn-hover-border-color: var(--danger);
+  --bs-btn-hover-color: var(--danger);
+}
+
+/* Quiet text button */
+.btn-quiet {
+  --bs-btn-bg: transparent;
+  --bs-btn-border-color: transparent;
+  --bs-btn-color: var(--ink-2);
+  /* --hover-surface moves away from the page colour in whichever theme is
+     active. --cream-2 only lifts in light mode; in dark it went darker than
+     the surface, so a quiet button receded under the cursor. */
+  --bs-btn-hover-bg: var(--hover-surface);
+  --bs-btn-hover-border-color: transparent;
+  --bs-btn-hover-color: var(--ink);
+  padding-inline: 0.75rem;
+}
+.btn-link {
+  --bs-btn-color: var(--bs-link-color);
+  --bs-btn-hover-color: var(--bs-link-hover-color);
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0;
+  border: 0;
+}
+.btn-link:hover {
+  text-decoration: underline;
+}
+
+.btn:disabled,
+.btn.disabled {
+  opacity: 0.45;
+  box-shadow: none;
+}
+
+/* Icon-only control */
+.btn-icon {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background var(--t-fast),
+    border-color var(--t-fast),
+    color var(--t-fast);
+}
+.btn-icon:hover {
+  background: var(--cream-2);
+  border-color: var(--border-2);
+  color: var(--ink);
+}
+
+/* ============================ 5. Forms =================================== */
+.form-label {
+  display: block;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--ink);
+  margin-bottom: 0.4rem;
+}
+.form-label .optional {
+  font-weight: 500;
+  color: var(--ink-3);
+  font-size: 0.82rem;
+}
+.form-control,
+.form-select {
+  border-radius: var(--r-md);
+  border: 1px solid var(--border-2);
+  padding: 0.62rem 0.85rem;
+  font-size: 0.95rem;
+  color: var(--ink);
+  background-color: var(--surface);
+  transition:
+    border-color var(--t-fast),
+    box-shadow var(--t-fast);
+}
+.form-control::placeholder {
+  color: var(--ink-3);
+}
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--accent-600);
+  box-shadow: 0 0 0 3px rgba(226, 121, 61, 0.18);
+  outline: none;
+}
+.form-control-lg {
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+}
+
+/* File inputs. The browser paints ::file-selector-button from the system
+   palette but lets it inherit the field's text colour, so in dark mode a
+   near-white label landed on a light system button and vanished. Painting
+   it from the tokens fixes that and makes it look like the rest of the
+   system in both themes. */
+.form-control[type="file"] {
+  padding: 0.34rem 0.4rem;
+}
+.form-control[type="file"]::file-selector-button {
+  margin-right: 0.7rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border-2);
+  background: var(--cream-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background var(--t-fast),
+    border-color var(--t-fast),
+    color var(--t-fast);
+}
+.form-control[type="file"]::file-selector-button:hover {
+  background: var(--surface);
+  border-color: var(--ink-3);
+}
+.form-text {
+  font-size: 0.82rem;
+  color: var(--ink-3);
+  margin-top: 0.35rem;
+}
+.form-check-input {
+  border-color: var(--border-2);
+}
+.form-check-input:checked {
+  background-color: var(--accent-600);
+  border-color: var(--accent-600);
+}
+.form-check-input:focus {
+  border-color: var(--accent-600);
+  box-shadow: 0 0 0 3px rgba(226, 121, 61, 0.18);
+}
+.form-check-label {
+  font-size: 0.93rem;
+  color: var(--ink-2);
+}
+
+.field-group {
+  margin-bottom: var(--s-5);
+}
+.field-group:last-child {
+  margin-bottom: 0;
+}
+
+/* Input with a leading icon (search) */
+.input-icon {
+  position: relative;
+}
+.input-icon > svg {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-3);
+  pointer-events: none;
+}
+.input-icon .form-control {
+  padding-left: 2.55rem;
+}
+
+/* ============================ 6. Cards =================================== */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-xs);
+}
+.card-body {
+  padding: var(--s-5);
+}
+@media (min-width: 768px) {
+  .card-body {
+    padding: var(--s-6);
+  }
+}
+.card-pad {
+  padding: var(--s-5);
+}
+@media (min-width: 768px) {
+  .card-pad {
+    padding: var(--s-6);
+  }
+}
+.card-flush {
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.card-title {
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding: var(--s-4) var(--s-5);
+  border-bottom: 1px solid var(--border);
+}
+.panel-head h2,
+.panel-head h3 {
+  font-size: 1.05rem;
+  margin: 0;
+}
+.panel-body {
+  padding: var(--s-5);
+}
+
+.empty-state {
+  text-align: center;
+  padding: var(--s-12) var(--s-5);
+  color: var(--ink-2);
+}
+.empty-state .empty-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--r-pill);
+  background: var(--cream-2);
+  color: var(--ink-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--s-4);
+}
+.empty-state h2,
+.empty-state h3 {
+  margin-bottom: var(--s-2);
+  font-size: 1.15rem;
+}
+
+/* ============================ 7. Badges / alerts / tables ================ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border-radius: var(--r-pill);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.735rem;
+  letter-spacing: 0.02em;
+  padding: 0.32em 0.72em;
+  line-height: 1.5;
+}
+.badge-cat,
+.badge.bg-secondary {
+  background: var(--cream-2) !important;
+  color: var(--ink-2) !important;
+  border: 1px solid var(--border);
+}
+.badge-ok,
+.badge.bg-success {
+  background: var(--green-050) !important;
+  color: var(--green-text) !important;
+}
+.badge-warn,
+.badge.bg-warning {
+  background: var(--warn-050) !important;
+  color: var(--warn) !important;
+}
+.badge-out,
+.badge.bg-danger {
+  background: var(--danger-050) !important;
+  color: var(--danger) !important;
+}
+.badge.bg-info {
+  background: #e6eef2 !important;
+  color: #2b5567 !important;
+}
+.badge.text-dark {
+  color: inherit !important;
+}
+
+.alert {
+  border-radius: var(--r-md);
+  border: 1px solid transparent;
+  padding: 0.9rem 1.1rem;
+  font-size: 0.94rem;
+}
+.alert-success {
+  background: var(--green-050);
+  border-color: var(--green-border);
+  color: var(--green-text);
+}
+.alert-danger {
+  background: var(--danger-050);
+  border-color: var(--danger-border);
+  color: var(--danger);
+}
+.alert-info {
+  background: var(--cream-2);
+  border-color: var(--border);
+  color: var(--ink-2);
+}
+.alert ul {
+  padding-left: 1.1rem;
+  margin: 0;
+}
+
+.table {
+  /* Bootstrap paints cells from --bs-table-*-state, and its own defaults for
+     the hover, striped and active states resolve to --bs-emphasis-color,
+     which is black. It only had --bs-table-color bridged, so a row at rest
+     was fine while a hovered row turned its text black - unreadable on a
+     dark card. Every state token is bridged here rather than patched per
+     screen, so the whole back office follows the theme. */
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--ink);
+  --bs-emphasis-color: var(--ink);
+  --bs-table-hover-color: var(--ink);
+  --bs-table-hover-bg: var(--row-hover);
+  --bs-table-striped-color: var(--ink);
+  --bs-table-striped-bg: var(--row-hover);
+  --bs-table-active-color: var(--ink);
+  --bs-table-active-bg: var(--row-hover);
+  margin-bottom: 0;
+}
+.table > :not(caption) > * > * {
+  padding: 0.85rem 0.75rem;
+}
+.table thead th {
+  color: var(--ink-3);
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.table tbody td {
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.table tfoot th {
+  border-top: 1px solid var(--border-2);
+  border-bottom: 0;
+}
+.table-hover tbody tr:hover > * {
+  background: var(--row-hover);
+  color: var(--ink);
+}
+
+.thumb {
+  border-radius: var(--r-sm);
+  object-fit: cover;
+  background: var(--cream-2);
+  border: 1px solid var(--border);
+}
+
+/* ============ 37. Security: policy checklist, MFA, cookie notice ========
+   Built from the existing tokens - the security screens should still look
+   like MarkMe, not like a different product bolted on.
+   ======================================================================== */
+
+/* ---------------------------- password policy ------------------------- */
+.pw-policy {
+  list-style: none;
+  margin: var(--s-3) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.3rem var(--s-4);
+}
+.pw-policy li {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  transition: color var(--t-fast);
+}
+.pw-policy .pw-mark {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  border-radius: var(--r-pill);
+  border: 1.5px solid var(--border-2);
+  position: relative;
+  transition:
+    background var(--t-fast),
+    border-color var(--t-fast);
+}
+.pw-policy li.is-met {
+  color: var(--green-text);
+}
+.pw-policy li.is-met .pw-mark {
+  background: var(--green-text);
+  border-color: var(--green-text);
+}
+/* The tick is drawn rather than an icon, so it can animate in with the state. */
+.pw-policy li.is-met .pw-mark::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* ------------------------------ MFA enrolment ------------------------- */
+.mfa-enrol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-6);
+  align-items: flex-start;
+  margin-top: var(--s-4);
+}
+.mfa-qr {
+  flex: none;
+  padding: var(--s-3);
+  /* Deliberately not a token: a QR code needs a light quiet zone to scan,
+     so this one stays white in dark mode too. */
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  line-height: 0;
+}
+.mfa-enrol-main {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+.mfa-secret {
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  background: var(--chip-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 0.5rem 0.75rem;
+  margin: var(--s-2) 0 var(--s-5);
+  overflow-wrap: anywhere;
+}
+
+/* ------------------------------ cookie notice ------------------------- */
+.cookie-banner {
+  position: fixed;
+  left: var(--s-5);
+  right: var(--s-5);
+  bottom: var(--s-5);
+  z-index: 1080;
+  max-width: 560px;
+  margin-inline: auto;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--s-5);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-4);
+}
+.cookie-banner p {
+  margin: 0;
+  flex: 1 1 260px;
+  font-size: 0.88rem;
+  color: var(--ink-2);
+}
+.cookie-banner .cookie-actions {
+  display: flex;
+  gap: var(--s-2);
+  flex: none;
+}
+
+@media (max-width: 639.98px) {
+  .cookie-banner {
+    left: var(--s-3);
+    right: var(--s-3);
+    bottom: var(--s-3);
+  }
+  .cookie-banner .cookie-actions {
+    width: 100%;
+  }
+  .cookie-banner .cookie-actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+/* ============ 39. Motion ================================================
+   One layer of movement across the site, rather than a different idea per
+   component. Everything here is opt-in from the markup and every rule is
+   switched off under prefers-reduced-motion at the end of the file.
+   ======================================================================== */
+
+/* --------------------------- scroll reveal ----------------------------- */
+/* The hidden state is applied only once JS has confirmed it can reveal
+   again (html.js-motion). Without scripting, nothing is ever hidden. */
+.js-motion [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+}
+/* No will-change here on purpose. Hinting the pending state sounds right, but
+   everything below the fold is pending from the moment the page loads, so the
+   hint would promote the whole document to its own layers and hold them there.
+   Measured over a full-page scroll it made no difference either way, so the
+   version that does not pin layers wins. */
+/* An animation rather than a transition out of the hidden state. A
+   transition only runs if the browser observes the change and is never
+   interrupted; an animation runs on the document timeline and holds its end
+   state, so a revealed section cannot be left stranded at opacity 0. */
+.js-motion [data-reveal].is-revealed {
+  /* The resting state is declared visible and the animation only decorates
+     the arrival. An animation wins over these while it plays, but if it never
+     plays - the element was display:none when the reveal fired, the tab was
+     throttled - the element is still visible rather than stuck at zero. */
+  opacity: 1;
+  transform: none;
+  animation: mm-reveal 0.62s var(--ease-entrance) both;
+}
+/* A stagger for grids, so a row of cards arrives as a sequence rather than
+   a single block. */
+.js-motion [data-reveal-stagger] > * {
+  opacity: 0;
+  transform: translateY(14px);
+}
+.js-motion [data-reveal-stagger].is-revealed > * {
+  opacity: 1;
+  transform: none;
+  animation: mm-reveal-child 0.52s var(--ease-entrance) both;
+}
+/* 55ms apart, and running further down the row than before: capping every
+   card past the fifth at one delay made the tail of a long grid land in a
+   single lump, which is the opposite of a stagger. */
+.js-motion [data-reveal-stagger].is-revealed > *:nth-child(1) { animation-delay: 0ms; }
+.js-motion [data-reveal-stagger].is-revealed > *:nth-child(2) { animation-delay: 55ms; }
+.js-motion [data-reveal-stagger].is-revealed > *:nth-child(3) { animation-delay: 110ms; }
+.js-motion [data-reveal-stagger].is-revealed > *:nth-child(4) { animation-delay: 165ms; }
+.js-motion [data-reveal-stagger].is-revealed > *:nth-child(5) { animation-delay: 220ms; }
+.js-motion [data-reveal-stagger].is-revealed > *:nth-child(6) { animation-delay: 275ms; }
+.js-motion [data-reveal-stagger].is-revealed > *:nth-child(7) { animation-delay: 330ms; }
+.js-motion [data-reveal-stagger].is-revealed > *:nth-child(8) { animation-delay: 385ms; }
+/* Anything past the eighth shares one delay. Beyond about half a second the
+   sequence stops reading as a sequence and just feels late. */
+.js-motion [data-reveal-stagger].is-revealed > *:nth-child(n + 9) { animation-delay: 440ms; }
+
+@keyframes mm-reveal {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes mm-reveal-child {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ------------------------- micro-interactions -------------------------- */
+/* A press should feel like a press. Applied to the button base so it covers
+   every variant without each one opting in. */
+.btn {
+  transition:
+    background var(--t-fast),
+    border-color var(--t-fast),
+    color var(--t-fast),
+    box-shadow var(--t-fast),
+    transform 0.12s var(--ease);
+}
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+/* Rows in the back office settle under the cursor rather than snapping. */
+.table-hover tbody tr {
+  transition: background var(--t-fast);
+}
+
+/* Badges that carry a count pop when the number changes (class set by JS). */
+@keyframes mm-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.22); }
+  100% { transform: scale(1); }
+}
+.badge-mini.is-bumped,
+.cart-count.is-bumped {
+  animation: mm-pop 0.36s var(--ease);
+}
+
+/* The cookie notice rises in rather than appearing. */
+@keyframes mm-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+.js-motion .cookie-banner:not([hidden]) {
+  animation: mm-rise 0.4s var(--ease) both;
+}
+
+/* Flash messages arrive the same way, so feedback reads as one system. */
+.js-motion .alert {
+  animation: mm-rise 0.35s var(--ease) both;
+}
+
+/* A field that failed validation draws the eye once, briefly. */
+@keyframes mm-nudge {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+.form-control.is-invalid-shake {
+  animation: mm-nudge 0.3s var(--ease);
+}
+
+/* ------------------------------- images -------------------------------- */
+/* The fade is an animation over the image's natural state, not a transition
+   out of a hidden one. That matters: with a hidden base state, anything that
+   stops the transition finishing - a throttled tab, a class applied in the
+   same frame, a browser that never fires load - leaves the picture stranded
+   at opacity 0. Here the worst case is that the animation does not play and
+   the image is simply visible. */
+.img-fade {
+  animation: mm-img-in 0.4s var(--ease-entrance) both;
+}
+@keyframes mm-img-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ------------------------------ hover lift ----------------------------- */
+/* One lift, shared by every card that responds to the cursor, so the whole
+   system reacts the same way rather than each component inventing its own. */
+.product-card,
+.ad-card,
+.order-card,
+.stat-card {
+  transition:
+    transform 0.22s var(--ease),
+    box-shadow 0.22s var(--ease),
+    border-color var(--t-fast);
+}
+.product-card:hover,
+.ad-card:hover,
+.order-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md, var(--shadow-sm));
+}
+
+/* ---------------------------- menus and panels ------------------------- */
+/* Bootstrap shows dropdowns instantly; a short rise makes the connection
+   between the button and the menu readable.
+
+   The rise uses the `translate` property, never `transform`. Popper positions
+   an open dropdown by writing transform onto the element, and an animation
+   beats an inline style - so animating transform here silently threw that
+   positioning away and every menu opened on top of its own button instead of
+   below it. `translate` composes with transform rather than replacing it. */
+.dropdown-menu.show {
+  animation: mm-menu 0.16s var(--ease) both;
+}
+@keyframes mm-menu {
+  from { opacity: 0; translate: 0 -4px; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+/* ---------------------------------------------------------------------
+   Reduced motion: movement off, state still legible. Opacity and colour
+   changes stay, because they carry meaning rather than decoration.
+   --------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .js-motion [data-reveal],
+  .js-motion [data-reveal-stagger] > * {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    animation: none;
+  }
+  .js-motion .cookie-banner:not([hidden]),
+  .js-motion .alert {
+    animation: none;
+  }
+  .btn:active:not(:disabled) {
+    transform: none;
+  }
+  .badge-mini.is-bumped,
+  .cart-count.is-bumped,
+  .form-control.is-invalid-shake,
+  .captcha-reload.is-spinning {
+    animation: none;
+    transform: none;
+  }
+  /* Switching the animation off is enough; clearing transform would throw
+     away the position Popper wrote onto the open menu. */
+  .dropdown-menu.show {
+    animation: none;
+  }
+  .product-card:hover,
+  .ad-card:hover,
+  .order-card:hover {
+    transform: none;
+  }
+  .img-fade {
+    animation: none;
+  }
+}
+
+/* ============ 40. Password visibility toggle ============================
+   The wrapper is created by JS, so these rules only ever apply once the
+   button exists - a field with scripting off keeps its normal full width.
+   ======================================================================== */
+
+.pw-field {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+/* Room for the button, so a long password never runs underneath it. */
+.pw-field .form-control {
+  padding-right: 2.75rem;
+  width: 100%;
+}
+.pw-field .form-control-sm {
+  padding-right: 2.25rem;
+}
+.pw-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    color var(--t-fast),
+    background var(--t-fast);
+}
+.pw-toggle:hover {
+  color: var(--ink);
+  background: var(--chip-bg);
+}
+.pw-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  color: var(--ink);
+}
+.pw-field .form-control-sm ~ .pw-toggle {
+  width: 26px;
+  height: 26px;
+  right: 0.3rem;
+}
+
+/* The reset-password rows in Staff and Admins lay their input out in a flex
+   row; the wrapper has to take the input's place in that flow. */
+.staff-actions form .pw-field {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---------------------------- confirmation dialog ----------------------
+   One dialog, used by every destructive action. Built from the same tokens
+   as the rest of MarkMe rather than looking like a browser alert.
+   ---------------------------------------------------------------------- */
+
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1090;
+  background: rgba(31, 29, 26, 0.45);
+  backdrop-filter: blur(2px);
+  animation: confirm-fade 0.16s var(--ease) both;
+}
+.confirm-dialog {
+  position: fixed;
+  z-index: 1091;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(92vw, 420px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--s-6);
+  text-align: center;
+  animation: confirm-pop 0.18s var(--ease) both;
+}
+.confirm-title {
+  margin: 0 0 var(--s-3);
+  font-size: 1.15rem;
+  line-height: 1.3;
+}
+.confirm-body {
+  margin: 0 0 var(--s-2);
+  color: var(--ink-2);
+  font-size: 0.92rem;
+  overflow-wrap: anywhere;
+}
+.confirm-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+.confirm-actions {
+  display: flex;
+  gap: var(--s-3);
+  justify-content: center;
+  margin-top: var(--s-6);
+}
+.confirm-actions .btn {
+  min-width: 118px;
+  justify-content: center;
+}
+/* The page behind must not scroll while a decision is pending. */
+body.confirm-open {
+  overflow: hidden;
+}
+
+@keyframes confirm-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes confirm-pop {
+  from { opacity: 0; transform: translate(-50%, -46%) scale(0.97); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confirm-backdrop,
+  .confirm-dialog {
+    animation: none;
+  }
+}
+
+@media (max-width: 479.98px) {
+  .confirm-actions {
+    flex-direction: column-reverse;
+  }
+  .confirm-actions .btn {
+    width: 100%;
+  }
+}
+
+/* ---------------------- shared image picker extras ----------------------
+   The dropzone itself is styled with the studio (customer.css); these are
+   the parts the back-office form added: the inline error, the compact
+   variant, and the busy state while the form posts.
+   ------------------------------------------------------------------------ */
+.dz-error {
+  margin: var(--s-2) 0 0;
+  font-size: 0.82rem;
+  color: var(--danger);
+}
+[data-dropzone].has-error .dropzone {
+  border-color: var(--danger);
+}
+.dropzone-sm {
+  padding: var(--s-5) var(--s-4);
+}
+.dropzone-sm .dz-title {
+  font-size: 0.9rem;
+}
+[data-dropzone].is-uploading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+.option-current {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin-bottom: var(--s-3);
+}
+.option-current .form-text {
+  margin: 0;
+}

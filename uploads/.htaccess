@@ -1,0 +1,7 @@
+# Uploaded files are user-controlled data — never execute them as scripts.
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<FilesMatch "\.(php|php\d|phtml|pht)$">
+    Require all denied
+</FilesMatch>

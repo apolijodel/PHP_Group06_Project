@@ -1,0 +1,273 @@
+/* =====================================================================
+   MarkMe - base.css
+
+   Element defaults and page layout: typography, the container, section
+   rhythm. No components yet.
+
+   Part of a split stylesheet. The files load in this order and must
+   stay in it: variables, base, components, customer, admin, auth,
+   responsive, overrides.
+   ===================================================================== */
+
+/* ============================ 2. Base ==================================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.display-serif,
+.brand-mark {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.18;
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+
+h1,
+.h1 {
+  font-size: clamp(1.9rem, 3vw, 2.4rem);
+}
+h2,
+.h2 {
+  font-size: clamp(1.6rem, 2.6vw, 2.1rem);
+}
+h3,
+.h3 {
+  font-size: clamp(1.25rem, 1.8vw, 1.5rem);
+}
+h4,
+.h4 {
+  font-size: 1.15rem;
+}
+h5,
+.h5 {
+  font-size: 1.02rem;
+}
+h6,
+.h6 {
+  font-size: 0.92rem;
+}
+
+.display-1,
+.hero h1 {
+  font-size: clamp(2.35rem, 4.6vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+
+p {
+  margin: 0 0 var(--s-4);
+}
+p:last-child {
+  margin-bottom: 0;
+}
+
+a {
+  color: var(--green-ink);
+  text-decoration: none;
+  transition: color var(--t-fast);
+}
+a:hover {
+  color: var(--bs-link-hover-color);
+}
+
+img {
+  max-width: 100%;
+}
+
+/* Text helpers */
+.eyebrow {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+  margin: 0;
+}
+.eyebrow-muted {
+  color: var(--ink-3);
+}
+.lede {
+  font-size: 1.08rem;
+  color: var(--ink-2);
+  line-height: 1.7;
+}
+.text-muted,
+.text-body-secondary {
+  color: var(--ink-3) !important;
+}
+.text-soft {
+  color: var(--ink-2) !important;
+}
+.text-accent {
+  color: var(--accent-text) !important;
+}
+.text-brand-green {
+  color: var(--green-ink) !important;
+}
+.mono-num {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Focus — visible everywhere, never removed */
+:focus-visible {
+  outline: 2px solid var(--accent-600);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+.btn:focus-visible,
+.form-control:focus-visible,
+.form-select:focus-visible {
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -110%);
+  background: var(--ink-surface);
+  color: var(--on-ink);
+  padding: 0.6rem 1.1rem;
+  border-radius: 0 0 var(--r-md) var(--r-md);
+  z-index: 2000;
+  font-weight: 600;
+  transition: transform var(--t-base);
+}
+/* Pinned in every state. The generic a:hover repaints links green, which on
+   this link's dark chrome is unreadable; :focus already outranked it, but a
+   keyboard affordance should not depend on winning a specificity contest. */
+.skip-link:focus,
+.skip-link:hover,
+.skip-link:active {
+  color: #fff;
+}
+.skip-link:focus {
+  transform: translate(-50%, 0);
+}
+
+/* ============================ 3. Layout ================================== */
+.container,
+.container-lg,
+.container-xl {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--s-5);
+}
+@media (min-width: 992px) {
+  .container,
+  .container-lg,
+  .container-xl {
+    padding-inline: var(--s-8);
+  }
+}
+.container-narrow {
+  max-width: 780px;
+}
+
+.section {
+  padding-block: var(--section-y);
+}
+.section-tight {
+  padding-block: clamp(2.25rem, 4vw, 3.25rem);
+}
+.section-cream {
+  background: var(--cream-2);
+}
+.section-white {
+  background: var(--surface);
+}
+.section + .section-cream,
+.section-cream + .section {
+  border-top: 1px solid var(--border);
+}
+
+/* Vertical rhythm: eyebrow → heading → description → actions */
+.section-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  max-width: 62ch;
+  margin-bottom: var(--s-10);
+}
+.section-head > * {
+  margin: 0;
+}
+.section-head p {
+  color: var(--ink-2);
+}
+.section-head-center {
+  align-items: center;
+  text-align: center;
+  margin-inline: auto;
+}
+.section-head-row {
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s-6);
+  max-width: none;
+}
+
+/* Page header used on interior (non-marketing) pages */
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s-4);
+  margin-bottom: var(--s-8);
+}
+.page-head .eyebrow {
+  margin-bottom: var(--s-1);
+}
+.page-head p {
+  color: var(--ink-2);
+  margin: var(--s-1) 0 0;
+}
+
+.page-shell {
+  padding-block: clamp(2rem, 4vw, 3rem);
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: var(--s-6) 0;
+  opacity: 1;
+}

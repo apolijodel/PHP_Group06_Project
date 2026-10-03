@@ -1,0 +1,304 @@
+/* =====================================================================
+   MarkMe - responsive.css
+
+   The breakpoints for everything above.
+
+   Part of a split stylesheet. The files load in this order and must
+   stay in it: variables, base, components, customer, admin, auth,
+   responsive, overrides.
+   ===================================================================== */
+
+/* ============================ 20. Responsive ============================= */
+@media (max-width: 1199.98px) {
+  .site-nav a {
+    padding-inline: 0.55rem;
+    font-size: 0.9rem;
+  }
+  .value-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--s-5);
+  }
+}
+
+@media (max-width: 991.98px) {
+  :root {
+    --header-h: 62px;
+  }
+
+  .nav-toggle {
+    display: inline-flex;
+    order: -1;
+  }
+  .site-header-inner {
+    gap: var(--s-3);
+  }
+  .site-nav {
+    position: fixed;
+    inset: var(--header-h) 0 auto 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+    padding: var(--s-3);
+    max-height: calc(100vh - var(--header-h));
+    overflow-y: auto;
+    display: none;
+  }
+  .site-nav.open {
+    display: flex;
+  }
+  .site-nav a {
+    padding: 0.8rem 0.9rem;
+    font-size: 0.98rem;
+    border-radius: var(--r-md);
+  }
+  .site-nav a.active::after {
+    display: none;
+  }
+  .site-nav a.active {
+    background: var(--cream-2);
+  }
+
+  .hero-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-10);
+  }
+  .hero-copy {
+    max-width: none;
+    align-items: flex-start;
+  }
+  .hero-stage {
+    max-width: 400px;
+  }
+
+  .story-grid,
+  .contact-grid,
+  .pdp-grid,
+  .studio-grid,
+  .cart-grid,
+  .checkout-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pdp-gallery,
+  .preview-panel,
+  .summary-card,
+  .story-media {
+    aspect-ratio: 16 / 10;
+  }
+
+
+  .site-footer-top {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--s-8) var(--s-6);
+  }
+
+  .admin-side {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 1050;
+    transform: translateX(-100%);
+    transition: transform var(--t-base);
+    box-shadow: var(--shadow-lg);
+    /* Pinned to the window as a drawer, so here an inner scroller is the only
+       way to reach the last links. */
+    overflow-y: auto;
+  }
+  .admin-side.open {
+    transform: translateX(0);
+  }
+  .admin-burger {
+    display: inline-flex;
+  }
+  .admin-scrim {
+    position: fixed;
+    inset: 0;
+    background: rgba(31, 29, 26, 0.45);
+    z-index: 1040;
+    display: none;
+  }
+  .admin-scrim.open {
+    display: block;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .steps-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .section-head {
+    margin-bottom: var(--s-8);
+  }
+  .section-head-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .confirm-facts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+    gap: var(--s-4);
+  }
+  .product-body {
+    padding-inline: var(--s-4);
+  }
+  .product-actions {
+    padding-inline: var(--s-4);
+    flex-direction: column;
+  }
+  .product-desc {
+    display: none;
+  }
+
+  .cart-item {
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: var(--s-3) var(--s-4);
+    padding: var(--s-4);
+  }
+  .cart-item-media {
+    width: 72px;
+    height: 72px;
+  }
+  .cart-item-side {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    text-align: left;
+    padding-top: var(--s-3);
+    border-top: 1px dashed var(--border);
+  }
+
+  .auth-modal-content {
+    flex-direction: column;
+    max-height: 92vh;
+    overflow-y: auto;
+  }
+  .auth-visual {
+    flex: none;
+    padding: var(--s-6);
+    gap: var(--s-6);
+  }
+  .auth-visual .auth-shapes {
+    display: none;
+  }
+  .auth-form-panel {
+    padding: var(--s-6);
+  }
+
+  .hero-stage {
+    max-width: 330px;
+  }
+  .bookmark {
+    width: 82px;
+    height: 198px;
+    font-size: 0.68rem;
+  }
+  .bookmark-b {
+    height: 216px;
+  }
+  .bookmark-a {
+    transform: rotate(-13deg) translate(-74px, 6px);
+  }
+  .bookmark-c {
+    transform: rotate(13deg) translate(74px, 10px);
+  }
+  .hero-chip {
+    font-size: 0.72rem;
+    padding: 0.35rem 0.7rem;
+  }
+
+  .site-footer-top {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-6);
+    padding-block: var(--s-10) var(--s-8);
+  }
+  .site-footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-content {
+    padding: var(--s-4);
+  }
+  .admin-top {
+    padding-inline: var(--s-4);
+  }
+  .checkout-steps li span.step-name {
+    display: none;
+  }
+  .checkout-steps li.is-active span.step-name {
+    display: inline;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .header-actions .header-user .name {
+    display: none;
+  }
+  .header-user {
+    padding-inline: 0.35rem;
+    max-width: none;
+  }
+  .btn-lg {
+    padding: 0.8rem 1.35rem;
+    font-size: 0.95rem;
+  }
+  .hero-actions .btn {
+    flex: 1 1 100%;
+  }
+  .confirm-actions .btn {
+    flex: 1 1 100%;
+  }
+  .value-strip {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .admin-toolbar .form-select {
+    width: 100%;
+    min-width: 0;
+  }
+  .admin-toolbar .input-icon {
+    flex-basis: 100%;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .product-card:hover,
+  .step-card:hover,
+  .design-card:hover,
+  .option-thumb:hover {
+    transform: none;
+  }
+}
+
+/* Print */
+@media print {
+  .site-header,
+  .site-footer,
+  .btn,
+  body {
+    background: #fff;
+  }
+}
+
+/* Anchor offset for the sticky header */
+[id] {
+  scroll-margin-top: calc(var(--header-h) + 16px);
+}

@@ -1,0 +1,8 @@
+# Directory listings are never wanted here: every directory that should be
+# browsable has an index, and the rest were exposing their contents.
+Options -Indexes
+
+# Editor and OS leftovers should not be servable.
+<FilesMatch "(^\.|\.(bak|sql|log|ini|md|dist|example\.php)$)">
+    Require all denied
+</FilesMatch>

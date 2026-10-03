@@ -1,0 +1,915 @@
+/* =====================================================================
+   MarkMe - admin.css
+
+   The back office shell: the rail, the top bar, admin tables and panels.
+
+   Part of a split stylesheet. The files load in this order and must
+   stay in it: variables, base, components, customer, admin, auth,
+   responsive, overrides.
+   ===================================================================== */
+
+/* ============================ 18. Admin ================================== */
+.admin-body {
+  background: var(--cream);
+  display: block;
+  min-height: 100vh;
+}
+.admin-shell {
+  display: flex;
+  min-height: 100vh;
+}
+.admin-side {
+  --rail-w: 246px;
+  width: var(--rail-w);
+  flex: none;
+  background: var(--ink-surface);
+  color: #c9c3b8;
+  display: flex;
+  flex-direction: column;
+  /* No height cap and no overflow of its own: the rail is as tall as its nav
+     and the page scrolls it, so it never grows a second scrollbar. It used to
+     be `height: 100vh; overflow-y: auto`, which is what put a scrollbar inside
+     the dark column whenever the links ran past the fold. */
+}
+.admin-side .brand-mark {
+  color: #fff;
+  padding: var(--s-5);
+  font-size: 1.2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.admin-side .brand-mark::before {
+  background: var(--accent);
+}
+.admin-side .brand-mark small {
+  font-family: var(--font-body);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  align-self: flex-start;
+  margin-top: 2px;
+}
+.admin-nav {
+  flex: 0 0 auto;
+  padding: var(--s-4) var(--s-3) var(--s-6);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.admin-nav .group-label {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7d7669;
+  padding: var(--s-4) 0.75rem 0.4rem;
+}
+.admin-nav a {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.58rem 0.75rem;
+  border-radius: var(--r-sm);
+  color: #c9c3b8;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition:
+    background var(--t-fast),
+    color var(--t-fast);
+}
+.admin-nav a svg {
+  color: #8d867a;
+  flex: none;
+  transition: color var(--t-fast);
+}
+.admin-nav a:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+}
+.admin-nav a:hover svg {
+  color: #c9c3b8;
+}
+.admin-nav a.active {
+  background: rgba(226, 121, 61, 0.16);
+  color: #fff;
+  font-weight: 600;
+}
+.admin-nav a.active svg {
+  color: var(--accent);
+}
+.admin-nav .badge-mini {
+  margin-left: auto;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-radius: var(--r-pill);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.1rem 0.45rem;
+}
+
+.admin-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.admin-top {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--bar-bg);
+  backdrop-filter: saturate(140%) blur(10px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-3) var(--s-6);
+  min-height: 62px;
+}
+.admin-top h1 {
+  font-size: 1.28rem;
+  margin: 0;
+}
+.admin-top .admin-top-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+.admin-content {
+  padding: var(--s-6);
+}
+@media (min-width: 1200px) {
+  .admin-content {
+    padding: var(--s-8) var(--s-8) var(--s-12);
+  }
+}
+
+.admin-burger {
+  display: none;
+}
+
+.data-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+}
+.data-card .table {
+  margin: 0;
+}
+.data-card .table > :not(caption) > * > *:first-child {
+  padding-left: var(--s-5);
+}
+.data-card .table > :not(caption) > * > *:last-child {
+  padding-right: var(--s-5);
+}
+.data-card .table thead th {
+  background: var(--cream);
+}
+.table-actions {
+  display: flex;
+  gap: var(--s-2);
+  justify-content: flex-end;
+}
+
+/* Sales bar chart — pure CSS, driven by inline --h custom property */
+.chart {
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(4px, 1.2vw, 12px);
+  height: 190px;
+  padding-top: var(--s-4);
+}
+.chart .bar-col {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  height: 100%;
+  justify-content: flex-end;
+  min-width: 0;
+}
+.chart .bar {
+  width: 100%;
+  max-width: 44px;
+  height: var(--h, 2%);
+  min-height: 3px;
+  border-radius: var(--r-sm) var(--r-sm) 2px 2px;
+  background: linear-gradient(180deg, #e88b52, var(--accent-600));
+  transition: filter var(--t-fast);
+}
+.chart .bar-col:hover .bar {
+  filter: brightness(1.08);
+}
+.chart .bar-label {
+  font-size: 0.7rem;
+  color: var(--ink-3);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-4);
+  font-size: 0.8rem;
+  color: var(--ink-3);
+  margin-top: var(--s-4);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--border);
+}
+
+.status-bars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+.status-bar .status-bar-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--s-3);
+  font-size: 0.87rem;
+  margin-bottom: 0.4rem;
+}
+.status-bar .track {
+  height: 8px;
+  border-radius: var(--r-pill);
+  background: var(--cream-2);
+  overflow: hidden;
+}
+.status-bar .fill {
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: var(--green);
+  width: var(--w, 0%);
+}
+.status-bar.s-pending .fill {
+  background: var(--ink-3);
+}
+.status-bar.s-processing .fill {
+  background: #4d7f98;
+}
+.status-bar.s-on-shipping .fill {
+  background: var(--gold);
+}
+.status-bar.s-completed .fill {
+  background: var(--green);
+}
+.status-bar.s-cancelled .fill {
+  background: var(--danger);
+}
+
+.admin-login-body {
+  background: var(--ink-surface);
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: var(--s-6);
+}
+.admin-login-card {
+  width: 100%;
+  max-width: 410px;
+  background: var(--surface);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-lg);
+  padding: clamp(1.75rem, 4vw, 2.5rem);
+}
+.admin-login-card .brand-mark {
+  margin-bottom: var(--s-5);
+}
+
+/* ===================== 30. Role permission lists ========================= */
+.perm-list {
+  list-style: none;
+  margin: var(--s-3) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.perm-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  font-size: 0.89rem;
+  color: var(--ink-2);
+  line-height: 1.45;
+}
+.perm-list svg {
+  flex: none;
+  margin-top: 2px;
+}
+.perm-list.is-allowed svg {
+  color: var(--green-text);
+}
+.perm-list.is-denied svg {
+  color: var(--danger);
+}
+
+/* The staff row carries two controls — a toggle and an inline password reset.
+   Side by side they overflow the column, so they stack. */
+.staff-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--s-2);
+  min-width: 180px;
+}
+.staff-actions form {
+  display: flex;
+  gap: var(--s-2);
+}
+.staff-actions form:first-child .btn {
+  width: 100%;
+  justify-content: center;
+}
+.staff-actions .form-control {
+  min-width: 0;
+  flex: 1;
+}
+
+/* ============ 36. Back-office carousel ==================================
+   The same component as the storefront carousel (same script, same nav
+   buttons); only the card and the per-view count differ. Used where the
+   content is visual and browsable rather than a list to be scanned.
+   ======================================================================== */
+
+.carousel.admin-carousel {
+  margin-top: 0;
+  gap: var(--s-2);
+}
+.admin-carousel .carousel-track {
+  gap: var(--s-4);
+}
+/* Card width comes from --per, which the carousel script sets to the number
+   of cards it is currently showing. The count lives in the markup
+   (data-per-view) and CSS follows it, so the two can never disagree. */
+.admin-carousel .carousel-track > .ad-card {
+  flex: 0 0 calc((100% - (var(--per, 4) - 1) * var(--s-4)) / var(--per, 4));
+  max-width: calc((100% - (var(--per, 4) - 1) * var(--s-4)) / var(--per, 4));
+}
+.admin-carousel .carousel-nav {
+  width: 38px;
+  height: 38px;
+}
+
+/* ------------------- option tiles (shapes and designs) ------------------
+   Eight to a view on a wide screen, so a catalog of twenty is three pages
+   instead of a long scroll. The tile is deliberately small - image, name,
+   two icon actions - because at eight across there is no room for a
+   labelled button, and the image is the thing you are actually picking.
+   Width comes from --per, which the script sets to the count it is really
+   showing, so the tiles and the stepping can never disagree. */
+/* The catalog and the form that feeds it, level with each other on one row.
+   The catalog takes the room that is left so four tiles still fit; the form
+   keeps a fixed column, because a text field stretched across a wide screen
+   is harder to use, not easier. */
+.option-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
+  gap: var(--s-6);
+  /* Both cards take the height of the taller one, so the row reads as one
+     band rather than two panels of different sizes sitting next to each
+     other. Which of the two is taller changes - the form grows when it is
+     editing - so neither can simply be given a fixed height. */
+  align-items: stretch;
+}
+.option-layout > .card {
+  display: flex;
+  flex-direction: column;
+}
+/* The body takes the slack, and its contents sit in the middle of it, so the
+   extra height shows as even space above and below rather than a gap hanging
+   off the bottom. */
+.option-layout > .card > .panel-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+/* The breakpoint is set by the tiles, not by a round number: below roughly
+   1280px the form column leaves the catalog too little room for four of
+   them, so the two stack and the catalog gets the full width back. */
+@media (max-width: 1279.98px) {
+  .option-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.option-form-thumb {
+  display: block;
+  margin-bottom: var(--s-3);
+}
+.option-catalog-empty {
+  border: 0;
+  background: none;
+}
+
+.option-tile-carousel .carousel-track > .option-tile {
+  flex: 0 0 calc((100% - (var(--per, 4) - 1) * var(--s-4)) / var(--per, 4));
+  max-width: calc((100% - (var(--per, 4) - 1) * var(--s-4)) / var(--per, 4));
+}
+.option-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  transition:
+    border-color var(--t-fast),
+    box-shadow var(--t-fast);
+}
+.option-tile:hover {
+  border-color: var(--border-2);
+  box-shadow: var(--shadow-sm);
+}
+/* The item currently open in the form. Marked three ways - border, ring and
+   a check - so it does not depend on colour alone. */
+.option-tile.is-selected {
+  border-color: var(--accent-600);
+  box-shadow: 0 0 0 2px var(--accent-050);
+}
+.option-tile-flag {
+  position: absolute;
+  top: var(--s-2);
+  right: var(--s-2);
+  z-index: 1;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--r-pill);
+  background: var(--accent-600);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.option-tile-media {
+  aspect-ratio: 1 / 1;
+  background: var(--cream-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-2);
+}
+.option-tile-media img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.option-tile-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-2);
+  text-align: center;
+}
+/* Two lines then an ellipsis: names vary a lot, and every tile in a row has
+   to finish at the same height for the actions to line up. */
+.option-tile-name {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.option-tile-actions {
+  display: flex;
+  gap: var(--s-2);
+  margin-top: auto;
+}
+
+/* A smaller icon button for tight rows. */
+.btn-icon-sm {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-sm);
+}
+.btn-icon-danger:hover {
+  background: var(--danger-050);
+  border-color: var(--danger-border);
+  color: var(--danger);
+}
+
+
+
+.ad-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  transition:
+    border-color var(--t-fast),
+    box-shadow var(--t-fast);
+}
+.ad-card:hover {
+  border-color: var(--border-2);
+  box-shadow: var(--shadow-xs);
+}
+.ad-card-media {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 3;
+  background: var(--chip-bg);
+  overflow: hidden;
+}
+.ad-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.ad-card-media .ad-card-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+}
+.ad-card-media .badge {
+  position: absolute;
+  top: var(--s-2);
+  left: var(--s-2);
+}
+.ad-card-body {
+  padding: var(--s-3) var(--s-4) 0;
+  flex: 1;
+}
+.ad-card-name {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.92rem;
+  line-height: 1.3;
+}
+.ad-card-meta {
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.ad-card-meta .k {
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.68rem;
+  margin-right: 0.3rem;
+}
+.ad-card-foot {
+  padding: var(--s-3) var(--s-4) var(--s-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* Cards get narrow at two or four per view; the foot wraps rather than
+     letting a long price run off the edge. */
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+.ad-card-foot > * {
+  min-width: 0;
+  white-space: nowrap;
+}
+.ad-card-foot .btn {
+  flex: none;
+}
+
+/* Label/value specs. The storefront's .custom-tag pill is built for a wide
+   table cell; at card width a quoted line of text has to read as a line. */
+.ad-card-specs {
+  margin: var(--s-2) 0 0;
+  display: grid;
+  gap: 0.2rem;
+}
+.ad-card-specs > div {
+  display: flex;
+  gap: 0.45rem;
+  align-items: baseline;
+  font-size: 0.8rem;
+}
+.ad-card-specs dt {
+  flex: none;
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.66rem;
+}
+.ad-card-specs dd {
+  margin: 0;
+  min-width: 0;
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+}
+
+/* ---------------------------- audit trail cards ------------------------
+   Same card as the rest of the back office, minus the image: an event has
+   no picture, so the space goes to the sentence instead. */
+.ad-card.is-event {
+  min-height: 168px;
+}
+/* Some events link somewhere and some do not; reserving the button's height
+   keeps every timestamp on the same line across the row. */
+.ad-card.is-event .ad-card-foot {
+  min-height: 34px;
+}
+.ad-card.is-event .ad-card-body {
+  padding-top: var(--s-4);
+}
+.event-top {
+  margin: 0 0 var(--s-2);
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.event-icon {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-pill);
+  background: var(--chip-bg);
+  color: var(--ink-2);
+}
+.event-icon.tone-accent {
+  background: var(--accent-050, var(--chip-bg));
+  color: var(--accent-text);
+}
+.event-icon.tone-green {
+  background: var(--green-050, var(--chip-bg));
+  color: var(--green-text);
+}
+.event-summary {
+  margin: 0.3rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+}
+
+/* Who did it. Role reads at a glance, which is most of the point of a log. */
+.badge-role {
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  /* Truncates rather than spilling past the card edge if a card is ever
+     narrower than its own label. */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.badge.badge-role.r-admin {
+  background: var(--accent-050, var(--cream-2)) !important;
+  color: var(--accent-text) !important;
+  border: 1px solid var(--border);
+}
+.badge.badge-role.r-staff {
+  background: var(--green-050, var(--cream-2)) !important;
+  color: var(--green-text) !important;
+  border: 1px solid var(--border);
+}
+.badge.badge-role.r-customer,
+.badge.badge-role.r-guest {
+  background: var(--cream-2) !important;
+  color: var(--ink-2) !important;
+  border: 1px solid var(--border);
+}
+
+/* ---------------------------- audit trail filters ----------------------
+   A plain row of controls above the carousel. Wraps rather than shrinking,
+   so the date inputs keep their native width on narrow screens. */
+.audit-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--s-3) var(--s-2);
+  margin-bottom: var(--s-5);
+  padding-bottom: var(--s-4);
+  border-bottom: 1px solid var(--border);
+}
+/* Label and control sit on one line: there is plenty of horizontal room on
+   a dashboard, and stacking them made the bar twice as tall for no gain.
+   The fields still wrap onto more rows as the screen narrows. */
+.audit-filters .af-field {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--s-2);
+  min-width: 0;
+}
+.audit-filters .af-field .form-label {
+  flex: none;
+  white-space: nowrap;
+}
+.audit-filters .af-field .form-control,
+.audit-filters .af-field .form-select {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+/* Sized so the whole bar - five labelled controls plus the buttons - fits on
+   one row at a normal desktop width. Left to size themselves the selects took
+   their width from the longest option ("Customization Options"), which pushed
+   the buttons onto a second line. They still wrap as one unit on narrower
+   screens; this only stops them sprawling when there is room. */
+.audit-filters select {
+  min-width: 9rem;
+  max-width: 11rem;
+}
+/* The module names are the longest strings in the bar, so this one control
+   gets a little more room rather than every option being clipped. */
+.audit-filters #alModule {
+  max-width: 13rem;
+}
+.audit-filters input[type="date"] {
+  max-width: 8.75rem;
+}
+.audit-filters .form-label {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.audit-filters .af-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-left: auto;
+}
+
+@media (max-width: 639.98px) {
+  /* Full width each, label still beside its control. */
+  .audit-filters .af-field {
+    flex: 1 1 100%;
+  }
+  .audit-filters .af-actions {
+    margin-left: 0;
+    width: 100%;
+  }
+  .audit-filters .af-actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+/* Inventory filter bar: the category select and the stock chips on one line,
+   wrapping to two when there is not room for both. */
+.inventory-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-4);
+  margin-bottom: var(--s-5);
+}
+.inventory-filters .af-field {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--s-2);
+  flex: none;
+}
+.inventory-filters .af-field .form-label {
+  margin: 0;
+  flex: none;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.inventory-filters .af-field .form-select {
+  min-width: 11rem;
+}
+.inventory-filters .filter-pills {
+  margin: 0;
+}
+
+@media (max-width: 639.98px) {
+  .inventory-filters .af-field,
+  .inventory-filters .af-field .form-select {
+    width: 100%;
+  }
+}
+
+/* Security page: two stacked cards in the side column, with real spacing
+   between them rather than one sticky card overlapping the other. */
+.security-aside {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-6);
+  min-width: 0;
+}
+.security-aside > .card {
+  margin: 0;
+}
+/* The settings form is dense; give its fields a consistent rhythm so the
+   card does not need padding piled on to look separated. */
+.security-aside .field-group + .field-group {
+  margin-top: var(--s-5);
+}
+
+/* ============ 37. Upload review queue ==================================
+   One card per submission: the picture first, because that is what is
+   actually being judged, then the facts, then the two decisions.
+   ======================================================================== */
+.review-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--s-5);
+}
+.review-card {
+  display: flex;
+  flex-direction: column;
+}
+.review-preview {
+  aspect-ratio: 4 / 3;
+  background: var(--cream-2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-4);
+}
+.review-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.review-name {
+  margin: 0;
+  font-size: 1rem;
+}
+.review-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-3) var(--s-4);
+  margin: var(--s-4) 0;
+}
+.review-facts .span-2 {
+  grid-column: 1 / -1;
+}
+.review-facts dt {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.review-facts dd {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+.review-actions {
+  display: flex;
+  gap: var(--s-2);
+  align-items: center;
+  margin-top: var(--s-2);
+}
+.review-actions .form-control {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Status reads at a glance, and never by colour alone - the word is there. */
+.badge-status {
+  flex: none;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--r-pill);
+  border: 1px solid transparent;
+}
+.badge-status.s-pending {
+  background: var(--warn-050);
+  color: var(--warn);
+  border-color: var(--warn);
+}
+.badge-status.s-approved {
+  background: var(--green-050);
+  color: var(--green-ink);
+  border-color: var(--green-border);
+}
+.badge-status.s-rejected {
+  background: var(--danger-050);
+  color: var(--danger);
+  border-color: var(--danger-border);
+}

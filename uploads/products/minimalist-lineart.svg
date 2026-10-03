@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600" role="img" aria-label="Minimalist Line Art Bookmark: an off-white bookmark with a single continuous line drawing">
+  <defs>
+    <linearGradient id="bg4" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbf8f3"/><stop offset="1" stop-color="#efe7da"/></linearGradient>
+  </defs>
+  <rect width="600" height="600" fill="url(#bg4)"/>
+  <circle cx="300" cy="300" r="212" fill="#ffffff" opacity=".7"/>
+  <ellipse cx="300" cy="512" rx="104" ry="15" fill="#1f1d1a" opacity=".09"/>
+  <g transform="rotate(2 300 300)">
+    <path d="M230 96h140v340l-70 34-70-34z" fill="#ffffff" stroke="#e8e0d3" stroke-width="3"/>
+    <g fill="none" stroke="#1f1d1a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M266 248c0-26 16-44 34-44s34 18 34 44c0 22-14 34-34 46-20-12-34-24-34-46z"/>
+      <path d="M300 294v86"/>
+      <path d="M300 326c-14-12-30-14-40-8M300 350c14-12 30-14 40-8"/>
+    </g>
+    <g stroke="#bd5518" stroke-width="4" stroke-linecap="round">
+      <path d="M262 404h76"/>
+    </g>
+    <g stroke="#d9cfbd" stroke-width="3.5" stroke-linecap="round">
+      <path d="M258 160h84M272 182h56"/>
+    </g>
+    <circle cx="300" cy="128" r="9" fill="none" stroke="#d9cfbd" stroke-width="4"/>
+  </g>
+</svg>

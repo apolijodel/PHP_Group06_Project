@@ -1,0 +1,141 @@
+/* ==========================================================================
+   MarkMe — Design System
+   A warm, handcrafted stationery brand.
+   Sections:  Tokens · Base · Layout · Buttons · Forms · Cards · Badges
+              Navbar · Footer · Home · Shop · Product · Studio · Cart
+              Checkout · Account · Admin · Auth · Responsive
+   ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap");
+
+/* =====================================================================
+   MarkMe - variables.css
+
+   Design tokens. Every colour, radius, shadow and spacing step the rest of
+   the system refers to, plus their dark-mode values. Nothing else should
+   introduce a raw colour.
+
+   Part of a split stylesheet. The files load in this order and must
+   stay in it: variables, base, components, customer, admin, auth,
+   responsive, overrides.
+   ===================================================================== */
+
+/* ============================ 1. Tokens ================================== */
+:root {
+  /* Surfaces */
+  --cream: #fbf8f3;
+  --cream-2: #f4eee4;
+  --surface: #ffffff;
+
+  /* Ink */
+  --ink: #1f1d1a;
+  --ink-2: #57524a;
+  --ink-3: #7a7265;
+
+  /* Brand — orange is the CTA, green the secondary */
+  --accent: #e2793d; /* decorative fills, rings, hover glow */
+  --accent-600: #bd5518; /* button fill — AA with white text */
+  --accent-700: #a4470f; /* button hover / orange text on cream */
+  --accent-050: #fdf1e8; /* tint */
+  --green: #2f6f5e;
+  --green-700: #1f4f42;
+  --green-050: #e8f1ed;
+  --gold: #d9a441;
+
+  /* Role tokens — these exist because a token's *name* is not always its
+     *job*. --ink is text, but it is also the fill of dark chrome (footer,
+     admin sidebar, active pill). In dark mode text must lighten while that
+     chrome must stay dark, so the two roles need separate names. Likewise
+     --accent-700/--green-700 are button fills AND text colours; text on a
+     dark page has to go lighter while a fill must stay dark enough to carry
+     white label text. Splitting them is what lets one dark block below
+     re-theme the whole site without rewriting component rules. */
+  --ink-surface: var(--ink); /* dark chrome fill */
+  --on-ink: #ffffff; /* text on --ink-surface */
+  /* Translucent sticky bars and overlay chips sit ON the page, so they need a
+     surface colour of their own rather than a hardcoded white. */
+  --bar-bg: rgba(255, 255, 255, 0.92);
+  --chip-bg: rgba(255, 255, 255, 0.94);
+  --accent-text: var(--accent-700);
+  --green-text: var(--green-700);
+
+  /* Green used as ink on a page or card surface. Light mode keeps the brand
+     green exactly as it was; dark mode cannot, because #2f6f5e on a dark
+     card measures 2.8:1. Only this token changes, so every rule that paints
+     green text follows without needing a dark variant of its own. */
+  --green-ink: var(--green);
+
+  /* Lines */
+  --border: #e8e0d3;
+  --border-2: #d9cfbd;
+  /* A row or item under the cursor. Light lifts toward the page tint, dark
+     lifts away from it - "slightly different from the surface" is the job,
+     and which direction that is depends on the theme. */
+  --row-hover: #fbf8f3;
+  --hover-surface: #f4eee4;
+
+  /* Outlined buttons need a stronger line than --border-2 to read against
+     the page. Light keeps the value that was tuned for cream; dark needs its
+     own, because that same warm line on a dark surface is far too bright. */
+  --btn-outline-border: #cdc1ab;
+
+  --accent-border: #f0d9c6;
+  --green-border: #cfe3da;
+  --danger-border: #f0d3c5;
+
+  /* State */
+  --danger: #a1401a;
+  --danger-050: #fbeae2;
+  --warn: #8a6410;
+  --warn-050: #fbf2dd;
+
+  /* Elevation — deliberately restrained */
+  --shadow-xs: 0 1px 2px rgba(31, 29, 26, 0.05);
+  --shadow-sm: 0 2px 6px rgba(31, 29, 26, 0.06);
+  --shadow-md: 0 8px 20px rgba(31, 29, 26, 0.08);
+  --shadow-lg: 0 18px 44px rgba(31, 29, 26, 0.12);
+
+  /* Radius — one scale, no exceptions beyond --r-pill */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 24px;
+  --r-pill: 999px;
+
+  /* Spacing — 4px base */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.25rem;
+  --s-6: 1.5rem;
+  --s-8: 2rem;
+  --s-10: 2.5rem;
+  --s-12: 3rem;
+  --s-16: 4rem;
+  --section-y: clamp(3.25rem, 5.5vw, 5rem);
+  --container: 1240px;
+  --header-h: 68px;
+
+  /* Type */
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Motion */
+  --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+  /* Entrances get their own curve. --ease is tuned for controls reacting to
+     a click, where the motion should finish briskly; something arriving on
+     screen reads better decelerating into place over a longer tail. */
+  --ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
+  --t-fast: 0.15s var(--ease);
+  --t-base: 0.22s var(--ease);
+
+  /* Bootstrap bridge */
+  --bs-body-font-family: var(--font-body);
+  --bs-body-color: var(--ink);
+  --bs-border-color: var(--border);
+  --bs-link-color: var(--green);
+  --bs-link-hover-color: var(--green-700);
+  --bs-border-radius: var(--r-md);
+}

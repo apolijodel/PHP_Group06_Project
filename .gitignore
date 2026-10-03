@@ -1,0 +1,19 @@
+/config/config.php
+
+# Customer-uploaded customization photos are runtime data, not deliverable
+# assets — unlike the seeded placeholder images under products/shapes/designs.
+/uploads/customizations/*
+!/uploads/customizations/.gitkeep
+
+# Profile pictures are uploaded by whoever uses the site, so they are runtime
+# data for the same reason.
+/uploads/avatars/*
+!/uploads/avatars/.gitkeep
+
+# Written only when SMTP is not configured: a local copy of mail that could
+# not be sent. Useful while developing, not something to publish.
+/storage/outbox/
+
+.DS_Store
+Thumbs.db
+.claude/

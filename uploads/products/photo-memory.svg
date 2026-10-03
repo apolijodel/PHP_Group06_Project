@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600" role="img" aria-label="Photo Memory Bookmark: a deep green bookmark with a photo panel and a personal message">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbf8f3"/><stop offset="1" stop-color="#f0e8db"/></linearGradient>
+    <linearGradient id="bm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a8471"/><stop offset="1" stop-color="#1f4f42"/></linearGradient>
+    <linearGradient id="ph" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e8b878"/><stop offset="1" stop-color="#c98a52"/></linearGradient>
+  </defs>
+  <rect width="600" height="600" fill="url(#bg)"/>
+  <circle cx="300" cy="300" r="212" fill="#ffffff" opacity=".65"/>
+  <ellipse cx="312" cy="512" rx="118" ry="16" fill="#1f1d1a" opacity=".1"/>
+  <g transform="rotate(9 300 300)" opacity=".9">
+    <path d="M388 176h72v232l-36 16-36-16z" fill="#d9a441"/>
+    <path d="M398 188h52v214l-26 11-26-11z" fill="none" stroke="#fbf8f3" stroke-width="2" opacity=".45"/>
+  </g>
+  <g transform="rotate(-5 300 300)">
+    <path d="M222 96h156v344l-78 34-78-34z" fill="url(#bm)"/>
+    <path d="M236 110h128v318l-64 27-64-27z" fill="none" stroke="#ffffff" stroke-width="2" opacity=".35"/>
+    <rect x="254" y="140" width="92" height="92" rx="4" fill="url(#ph)" stroke="#ffffff" stroke-width="4"/>
+    <path d="M254 216l26-26 22 20 20-22 24 28v14h-92z" fill="#a4470f" opacity=".5"/>
+    <circle cx="282" cy="166" r="10" fill="#fbf8f3" opacity=".85"/>
+    <g stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity=".8">
+      <path d="M262 266h76M262 288h76M276 310h48"/>
+    </g>
+    <path d="M300 372c-17-14-26-22-26-32a13 13 0 0 1 26-5 13 13 0 0 1 26 5c0 10-9 18-26 32z" fill="#e2793d"/>
+  </g>
+</svg>

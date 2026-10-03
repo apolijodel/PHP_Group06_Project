@@ -1,0 +1,5 @@
+# Schema and seed data. The dump contains password hashes - it was downloadable.
+#
+# Nothing in this directory is meant to be fetched over HTTP. The files are
+# included by PHP from the filesystem, which .htaccess does not affect.
+Require all denied
