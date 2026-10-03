@@ -13,9 +13,9 @@ an approval queue for anything uploaded to the design studio.
 
 | # | Name | GitHub |
 |---|------|--------|
-| 1 | Jodel Apoli | [@apolijodel](https://github.com/apolijodel) |
-| 2 | *(to be completed)* | *(to be completed)* |
-| 3 | *(to be completed)* | *(to be completed)* |
+| 1 | Jodel S. Apoli | [@apolijodel](https://github.com/apolijodel) |
+| 2 | Rhod Lhian D. Duldulao | [https://github.com/DuldulaoRhod) |
+| 3 | Johnrey O. Samillano | *(to be completed)* |
 
 ---
 
