@@ -16,7 +16,7 @@ an approval queue for anything uploaded to the design studio.
 | 1 | Jodel S. Apoli | [@apolijodel](https://github.com/apolijodel) |
 | 2 | Rhod Lhian D. Duldulao | [@DuldulaoRhod](https://github.com/DuldulaoRhod) |
 | 3 | Johnrey O. Samillano | [@samillanojohnrey-a11y](https://github.com/samillanojohnrey-a11y) |
-| 4 | Johnrey O. Samillano | [@balawagal-charzil-eng](https://github.com/balawagal-charzil-eng) |
+| 4 | Al-Charzil S. Balawag | [@balawagal-charzil-eng](https://github.com/balawagal-charzil-eng) |
 
 ---
 
