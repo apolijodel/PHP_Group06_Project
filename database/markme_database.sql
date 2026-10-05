@@ -20,6 +20,19 @@ SET time_zone = "+00:00";
 --
 -- Database: `markme_db`
 --
+-- phpMyAdmin exports the tables only: it assumes you have already selected a
+-- database in its UI. Run from a terminal the way README.md documents --
+-- `mysql -u root < database/markme_database.sql` -- that assumption does not
+-- hold, and the import stops at the first CREATE TABLE with
+-- "ERROR 1046 (3D000): No database selected".
+--
+-- These three lines make the file self-contained so it imports the same way
+-- from phpMyAdmin or from a terminal. The DROP means re-importing over an
+-- existing markme_db replaces it instead of failing on "table already exists".
+--
+DROP DATABASE IF EXISTS `markme_db`;
+CREATE DATABASE `markme_db` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `markme_db`;
 
 -- --------------------------------------------------------
 
@@ -1481,6 +1494,10 @@ INSERT INTO `categories` (`category_id`, `name`, `description`, `created_at`) VA
 CREATE TABLE `designs` (
   `design_id` int(10) UNSIGNED NOT NULL,
   `name` varchar(100) NOT NULL,
+  -- Added after this dump was taken: the admin upload form requires a type,
+  -- and shape_save.php / design_save.php write it. Existing rows fall back to
+  -- the default, so the INSERTs below need no change.
+  `category` varchar(40) NOT NULL DEFAULT 'Uncategorized',
   `image_path` varchar(255) NOT NULL,
   `status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
   `uploaded_by` int(10) UNSIGNED DEFAULT NULL,
@@ -1721,6 +1738,10 @@ INSERT INTO `settings` (`setting_key`, `setting_value`, `updated_at`) VALUES
 CREATE TABLE `shapes` (
   `shape_id` int(10) UNSIGNED NOT NULL,
   `name` varchar(100) NOT NULL,
+  -- Added after this dump was taken: the admin upload form requires a type,
+  -- and shape_save.php / design_save.php write it. Existing rows fall back to
+  -- the default, so the INSERTs below need no change.
+  `category` varchar(40) NOT NULL DEFAULT 'Uncategorized',
   `image_path` varchar(255) NOT NULL,
   `status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
   `uploaded_by` int(10) UNSIGNED DEFAULT NULL,
