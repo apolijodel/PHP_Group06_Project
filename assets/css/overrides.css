@@ -49,11 +49,15 @@
   margin-bottom: var(--s-4);
 }
 
-/* Keep the sticky summary from overlapping the sticky header on short pages. */
-.summary-card,
-.preview-panel,
-
-/* Avatars rendered inline in admin tables. */
+/* Avatars rendered inline in admin tables: the initials are drawn in caps.
+   
+   This rule used to also list .summary-card and .preview-panel. Those belong
+   to an earlier rule whose declarations were lost, so their selectors fell
+   through onto this one and uppercased everything inside the checkout summary
+   and the design studio's preview - including the customer's own text, which
+   came out as JUST ONE MORE CHAPTER however it was typed. Both panels already
+   carry the sticky offset that the lost rule was for (customer.css), so the
+   selectors are simply gone rather than restored. */
 .table .avatar {
   text-transform: uppercase;
 }

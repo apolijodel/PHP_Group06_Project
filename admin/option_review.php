@@ -32,7 +32,7 @@ $rows = [];
 foreach ([['shapes', 'shape_id', 'shape'], ['designs', 'design_id', 'design']] as [$table, $key, $kind]) {
     $where = $filter === 'all' ? '' : ' WHERE o.status = :status';
     $stmt = db()->prepare(
-        "SELECT o.{$key} AS id, o.name, o.image_path, o.status, o.created_at,
+        "SELECT o.{$key} AS id, o.name, o.category, o.image_path, o.status, o.created_at,
                 o.reviewed_at, o.review_note, o.virus_scanned,
                 up.username AS uploader, rv.username AS reviewer
            FROM {$table} o
@@ -97,7 +97,7 @@ $pills = [
             : 'No items with this status.' ?></p>
     </div>
 <?php else: ?>
-    <div class="review-grid">
+    <div class="review-grid" data-reveal-grid>
         <?php foreach ($rows as $row): ?>
             <article class="card card-flush review-card">
                 <div class="review-preview">
@@ -113,7 +113,8 @@ $pills = [
                     </div>
 
                     <dl class="review-facts">
-                        <div><dt>Type</dt><dd><?= e(ucfirst($row['kind'])) ?></dd></div>
+                        <div><dt>Kind</dt><dd><?= e(ucfirst($row['kind'])) ?></dd></div>
+                        <div><dt>Type</dt><dd><?= e($row['category'] ?: 'Uncategorized') ?></dd></div>
                         <div><dt>Uploaded by</dt><dd><?= e($row['uploader'] ?? 'Seeded with the project') ?></dd></div>
                         <div><dt>Uploaded</dt>
                             <dd><?= e(date('M j, Y g:i A', strtotime((string)$row['created_at']))) ?></dd></div>

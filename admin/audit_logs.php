@@ -303,6 +303,7 @@ $anyFilter = $who !== '' || $fModule !== '' || $fAction !== ''
                     <th scope="col">Module</th>
                     <th scope="col">Description</th>
                     <th scope="col">IP address</th>
+                    <th scope="col">Device</th>
                 </tr>
             </thead>
             <tbody>
@@ -334,11 +335,21 @@ $anyFilter = $who !== '' || $fModule !== '' || $fAction !== ''
                         <td style="font-size:.82rem"><?= e((string)($row['module'] ?? '—')) ?></td>
                         <td style="font-size:.85rem"><?= e($row['summary']) ?></td>
                         <td class="mono-num" style="font-size:.78rem"><?= e((string)($row['ip_address'] ?? '—')) ?></td>
+                        <?php /* Derived from the User-Agent, which is self-reported and can
+                                 be anything the caller likes - useful for reading the log,
+                                 never evidence. The raw string is the title so it can be
+                                 checked, and nothing here exposes a credential. */ ?>
+                        <?php $agent = user_agent_summary($row['user_agent'] ?? null); ?>
+                        <td style="font-size:.78rem;white-space:nowrap"
+                            title="<?= e((string)($row['user_agent'] ?? 'No user agent recorded')) ?>">
+                            <span class="ua-line"><?= e($agent['device']) ?></span>
+                            <span class="ua-sub"><?= e($agent['os']) ?> &middot; <?= e($agent['browser']) ?></span>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
                 <?php if (!$rows): ?>
                     <tr>
-                        <td colspan="7">
+                        <td colspan="8">
                             <div class="empty-state">
                                 <span class="empty-icon"><?= icon('list', 24) ?></span>
                                 <h3><?= $anyFilter ? 'Nothing matches those filters' : 'No events recorded yet' ?></h3>

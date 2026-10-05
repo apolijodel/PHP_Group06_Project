@@ -839,7 +839,7 @@
 }
 .review-preview {
   aspect-ratio: 4 / 3;
-  background: var(--cream-2);
+  background: var(--art-bg);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
@@ -912,4 +912,84 @@
   background: var(--danger-050);
   color: var(--danger);
   border-color: var(--danger-border);
+}
+
+/* Device column in the audit trail: the class on top, the detail under it. */
+.ua-line {
+  display: block;
+  font-weight: 600;
+  color: var(--ink);
+}
+.ua-sub {
+  display: block;
+  color: var(--ink-3);
+  font-size: 0.72rem;
+}
+
+/* ============ Shapes & designs: entrance and hover ======================
+   Cards settle into place when the screen opens, and lift slightly under the
+   pointer. Deliberately small and short: this is a management screen that
+   gets opened dozens of times a day, and anything showier becomes a delay.
+
+   CSS only - no JavaScript runs per card, and the animation is composited
+   (opacity and transform), so it costs nothing on the main thread.
+   ======================================================================== */
+@keyframes mm-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+[data-reveal-grid] > * {
+  animation: mm-card-in 320ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+/* A short stagger so they arrive as a group, not a queue. Capped at eight:
+   beyond that the wait is noticeable and the effect stops being subtle. */
+[data-reveal-grid] > *:nth-child(1)  { animation-delay: 0ms; }
+[data-reveal-grid] > *:nth-child(2)  { animation-delay: 35ms; }
+[data-reveal-grid] > *:nth-child(3)  { animation-delay: 70ms; }
+[data-reveal-grid] > *:nth-child(4)  { animation-delay: 105ms; }
+[data-reveal-grid] > *:nth-child(5)  { animation-delay: 140ms; }
+[data-reveal-grid] > *:nth-child(6)  { animation-delay: 175ms; }
+[data-reveal-grid] > *:nth-child(7)  { animation-delay: 210ms; }
+[data-reveal-grid] > *:nth-child(n+8) { animation-delay: 245ms; }
+
+.review-card {
+  transition:
+    transform var(--t-fast),
+    box-shadow var(--t-fast);
+}
+.review-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+.review-preview img {
+  transition: transform var(--t-base);
+}
+.review-card:hover .review-preview img {
+  transform: scale(1.04);
+}
+
+/* Someone who has asked for less motion gets the layout, not the choreography.
+   The cards still appear - they are simply already in place. */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal-grid] > *,
+  [data-reveal-grid] > *:nth-child(n) {
+    animation: none;
+    animation-delay: 0ms;
+    opacity: 1;
+    transform: none;
+  }
+  .review-card,
+  .review-card:hover,
+  .review-preview img,
+  .review-card:hover .review-preview img {
+    transition: none;
+    transform: none;
+  }
 }

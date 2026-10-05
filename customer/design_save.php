@@ -58,8 +58,12 @@ if ($designName === '') {
     $designName = $product['name'] . ' design';
 }
 $designName = mb_substr($designName, 0, 100);
-// The studio's maxlength is a courtesy; this is the rule that holds.
-$customText = $customText !== '' ? mb_substr($customText, 0, CUSTOM_TEXT_MAX) : null;
+
+/* Personalized text was removed from the studio. A design being edited keeps
+   whatever text it already had - that is existing customer data and deleting it
+   because a feature retired would be losing their work - but nothing new is
+   accepted, so a posted custom_text is ignored. */
+$customText = null;
 
 // ---- the design being edited, if any ------------------------------------
 $existing = null;
@@ -78,7 +82,21 @@ if ($savedId > 0) {
 $imagePath = $existing['custom_image_path'] ?? null;
 $replacedImage = null;
 
-if (!empty($_FILES['custom_image']['name'])) {
+$hasNewPhoto = !empty($_FILES['custom_image']['name']);
+
+/* The same rule add_to_cart.php applies, for the same reason: a design and a
+   photo cannot share the face of the bookmark. Checked here too because saving
+   a design is its own endpoint, reachable without going through the studio. */
+if ($designId !== null && ($hasNewPhoto || ($imagePath && ($_POST['remove_image'] ?? '') !== '1'))) {
+    flash_set(
+        'error',
+        'A bookmark can carry a design or your photo, not both. '
+        . 'Remove the photo, or choose the plain or photo style instead.'
+    );
+    redirect($back);
+}
+
+if ($hasNewPhoto) {
     try {
         $imagePath = handle_image_upload($_FILES['custom_image'], __DIR__ . '/../uploads/customizations');
         $replacedImage = $existing['custom_image_path'] ?? null;

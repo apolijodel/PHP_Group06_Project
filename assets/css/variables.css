@@ -102,6 +102,12 @@
   --r-xl: 24px;
   --r-pill: 999px;
 
+  /* The backing that shape and design artwork is shown against. Deliberately
+     white in both themes: the files are transparent PNGs and SVGs meant for
+     white card, so showing them on cream (or on charcoal in dark mode) is
+     showing a colour the printed bookmark will not have. */
+  --art-bg: #ffffff;
+
   /* Spacing — 4px base */
   --s-1: 0.25rem;
   --s-2: 0.5rem;

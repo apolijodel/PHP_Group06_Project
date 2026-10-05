@@ -13,55 +13,124 @@ $requireCapability = 'reports.view';
 $pageTitle = 'Reports';
 require __DIR__ . '/includes/admin_header.php';
 
+/* ---- date range ---------------------------------------------------------
+   One range, applied to every figure on the page. Built once here so the
+   headline totals, the status split and the product table always describe the
+   same set of orders - a filter that moves some numbers and not others is
+   worse than no filter at all.
+
+   Only a real calendar date counts; anything else is dropped rather than
+   guessed at, and the bounds are swapped if they arrive backwards. */
+$asDate = static function (string $value): string {
+    $value = trim($value);
+    if ($value === '') {
+        return '';
+    }
+    $d = DateTime::createFromFormat('Y-m-d', $value);
+    return ($d && $d->format('Y-m-d') === $value) ? $value : '';
+};
+$fFrom = $asDate((string)($_GET['from'] ?? ''));
+$fTo = $asDate((string)($_GET['to'] ?? ''));
+if ($fFrom !== '' && $fTo !== '' && $fFrom > $fTo) {
+    [$fFrom, $fTo] = [$fTo, $fFrom];
+}
+$hasRange = $fFrom !== '' || $fTo !== '';
+
+$rangeSql = '';
+$rangeParams = [];
+if ($fFrom !== '') {
+    $rangeSql .= ' AND o.created_at >= :from';
+    $rangeParams['from'] = $fFrom . ' 00:00:00';
+}
+if ($fTo !== '') {
+    $rangeSql .= ' AND o.created_at <= :to';
+    $rangeParams['to'] = $fTo . ' 23:59:59';
+}
+/** The same conditions for queries whose orders table is not aliased. */
+$rangeSqlBare = str_replace('o.created_at', 'created_at', $rangeSql);
+
+$runRange = static function (string $sql, array $params) {
+    $stmt = db()->prepare($sql);
+    $stmt->execute($params);
+    return $stmt;
+};
+
 // ---- headline totals -----------------------------------------------------
-$totals = db()->query(
+$totals = $runRange(
     "SELECT
         COUNT(*) AS total_orders,
         COALESCE(SUM(CASE WHEN status <> 'Cancelled' THEN total_amount ELSE 0 END), 0) AS total_sales,
         SUM(status = 'Completed')  AS completed_orders,
         SUM(status = 'Pending')    AS pending_orders,
         SUM(status = 'Cancelled')  AS cancelled_orders
-     FROM orders"
+     FROM orders o
+     WHERE 1 = 1" . $rangeSql,
+    $rangeParams
 )->fetch();
 
-$itemsSold = (int)db()->query(
+$itemsSold = (int)$runRange(
     "SELECT COALESCE(SUM(oi.quantity), 0)
        FROM order_items oi
        JOIN orders o ON o.order_id = oi.order_id
-      WHERE o.status <> 'Cancelled'"
+      WHERE o.status <> 'Cancelled'" . $rangeSql,
+    $rangeParams
 )->fetchColumn();
 
 $paidOrders = (int)$totals['total_orders'] - (int)$totals['cancelled_orders'];
 $averageOrder = $paidOrders > 0 ? (float)$totals['total_sales'] / $paidOrders : 0.0;
 
 // ---- revenue for the last six months ------------------------------------
-$monthRows = db()->query(
-    "SELECT DATE_FORMAT(created_at, '%Y-%m') AS ym,
-            COALESCE(SUM(total_amount), 0) AS revenue,
+$monthRows = $runRange(
+    "SELECT DATE_FORMAT(o.created_at, '%Y-%m') AS ym,
+            COALESCE(SUM(o.total_amount), 0) AS revenue,
             COUNT(*) AS orders
-       FROM orders
-      WHERE status <> 'Cancelled'
-        AND created_at >= DATE_SUB(CURDATE(), INTERVAL 5 MONTH)
-      GROUP BY ym"
+       FROM orders o
+      WHERE o.status <> 'Cancelled'"
+    . ($hasRange ? $rangeSql : " AND o.created_at >= DATE_SUB(CURDATE(), INTERVAL 5 MONTH)")
+    . " GROUP BY ym",
+    $hasRange ? $rangeParams : []
 )->fetchAll();
 
 $revenueByMonth = array_column($monthRows, 'revenue', 'ym');
 $ordersByMonth = array_column($monthRows, 'orders', 'ym');
 
 $months = [];
-for ($i = 5; $i >= 0; $i--) {
-    $key = date('Y-m', strtotime("-$i month"));
-    $months[$key] = [
-        'revenue' => (float)($revenueByMonth[$key] ?? 0),
-        'orders' => (int)($ordersByMonth[$key] ?? 0),
-    ];
+if ($hasRange) {
+    /* Every month the range touches, so a filtered chart has the same shape as
+       an unfiltered one rather than collapsing to the months that happen to
+       have sales. Capped so a range of years cannot render a thousand bars. */
+    $cursor = new DateTime(($fFrom !== '' ? $fFrom : array_key_first($revenueByMonth) . '-01') . ' 00:00:00');
+    $cursor->modify('first day of this month');
+    $stop = new DateTime(($fTo !== '' ? $fTo : date('Y-m-d')) . ' 00:00:00');
+    $stop->modify('first day of this month');
+    $guard = 0;
+    while ($cursor <= $stop && $guard++ < 36) {
+        $key = $cursor->format('Y-m');
+        $months[$key] = [
+            'revenue' => (float)($revenueByMonth[$key] ?? 0),
+            'orders' => (int)($ordersByMonth[$key] ?? 0),
+        ];
+        $cursor->modify('+1 month');
+    }
+}
+if (!$months) {
+    for ($i = 5; $i >= 0; $i--) {
+        $key = date('Y-m', strtotime("-$i month"));
+        $months[$key] = [
+            'revenue' => (float)($revenueByMonth[$key] ?? 0),
+            'orders' => (int)($ordersByMonth[$key] ?? 0),
+        ];
+    }
 }
 $peak = max(1, max(array_column($months, 'revenue')));
 $periodTotal = array_sum(array_column($months, 'revenue'));
 
 // ---- status breakdown ----------------------------------------------------
 $statusCounts = array_column(
-    db()->query('SELECT status, COUNT(*) AS n FROM orders GROUP BY status')->fetchAll(),
+    $runRange(
+        'SELECT status, COUNT(*) AS n FROM orders o WHERE 1 = 1' . $rangeSql . ' GROUP BY status',
+        $rangeParams
+    )->fetchAll(),
     'n',
     'status'
 );
@@ -70,16 +139,17 @@ $statusTotal = max(1, array_sum($statusCounts));
 // ---- top products --------------------------------------------------------
 // Grouped on the snapshot name so a product deleted after being sold still
 // shows up in its own row rather than vanishing from the report.
-$topProducts = db()->query(
+$topProducts = $runRange(
     "SELECT oi.product_name_snapshot AS name,
             SUM(oi.quantity)   AS units,
             SUM(oi.line_total) AS revenue
        FROM order_items oi
        JOIN orders o ON o.order_id = oi.order_id
-      WHERE o.status <> 'Cancelled'
+      WHERE o.status <> 'Cancelled'" . $rangeSql . "
       GROUP BY oi.product_name_snapshot
       ORDER BY revenue DESC, units DESC
-      LIMIT 8"
+      LIMIT 8",
+    $rangeParams
 )->fetchAll();
 $topRevenue = $topProducts ? max(1, (float)$topProducts[0]['revenue']) : 1;
 ?>
@@ -91,6 +161,38 @@ $topRevenue = $topProducts ? max(1, (float)$topProducts[0]['revenue']) : 1;
         <p>Live figures from the orders table. Cancelled orders are excluded from all money totals.</p>
     </div>
 </div>
+
+<?php /* A plain GET form, like the audit trail's. Every figure below is
+         recalculated in SQL from this range - nothing on this page is computed
+         in the browser - so a filtered report is a URL you can bookmark. */ ?>
+<form method="get" class="audit-filters"
+      style="border-bottom:0;padding-bottom:0;margin-bottom:var(--s-5)">
+    <div class="af-field">
+        <label class="form-label" for="rpFrom">From</label>
+        <input type="date" id="rpFrom" name="from" class="form-control form-control-sm"
+               value="<?= e($fFrom) ?>">
+    </div>
+    <div class="af-field">
+        <label class="form-label" for="rpTo">To</label>
+        <input type="date" id="rpTo" name="to" class="form-control form-control-sm"
+               value="<?= e($fTo) ?>">
+    </div>
+    <div class="af-actions">
+        <button type="submit" class="btn btn-secondary btn-sm"><?= icon('search', 15) ?> Apply</button>
+        <?php if ($hasRange): ?>
+            <a class="btn btn-quiet btn-sm" href="<?= BASE_URL ?>/admin/reports.php">Clear</a>
+        <?php endif; ?>
+    </div>
+</form>
+
+<?php if ($hasRange): ?>
+    <p class="form-text" style="margin:calc(var(--s-5) * -1) 0 var(--s-5)">
+        <?= icon('info', 15) ?>
+        Showing orders
+        <?= $fFrom !== '' ? 'from ' . e(date('M j, Y', strtotime($fFrom))) : 'up to' ?>
+        <?= $fTo !== '' ? ($fFrom !== '' ? 'to ' : '') . e(date('M j, Y', strtotime($fTo))) : 'onwards' ?>.
+    </p>
+<?php endif; ?>
 
 <!-- ------------------------------ totals ------------------------------ -->
 <div class="stat-row" style="margin-bottom:var(--s-6)">

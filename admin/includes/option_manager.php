@@ -70,7 +70,7 @@ $self = BASE_URL . '/admin/' . basename($_SERVER['SCRIPT_NAME']);
                 <button type="button" class="carousel-nav prev" data-carousel-prev
                         aria-label="Previous <?= e(strtolower($opt['plural'])) ?>"><?= icon('chevron-left', 18) ?></button>
                 <div class="carousel-viewport">
-                    <div class="carousel-track" data-carousel-track>
+                    <div class="carousel-track" data-carousel-track data-reveal-grid>
                         <?php foreach ($rows as $row): ?>
                             <?php $rowId = (int)$row[$opt['idColumn']]; ?>
                             <?php $isSelected = $editing
@@ -138,6 +138,29 @@ $self = BASE_URL . '/admin/' . basename($_SERVER['SCRIPT_NAME']);
                 <label class="form-label" for="optName">Name</label>
                 <input type="text" id="optName" name="name" class="form-control"
                        value="<?= e($editing['name'] ?? '') ?>" required>
+            </div>
+
+            <div class="field-group">
+                <label class="form-label" for="optCategory">
+                    <?= e($opt['singular']) ?> type
+                </label>
+                <select id="optCategory" name="category" class="form-select" required>
+                    <option value="">Choose a type&hellip;</option>
+                    <?php foreach ($opt['categories'] as $cat): ?>
+                        <option value="<?= e($cat) ?>"
+                            <?= ($editing['category'] ?? '') === $cat ? 'selected' : '' ?>>
+                            <?= e($cat) ?>
+                        </option>
+                    <?php endforeach; ?>
+                    <?php if (($editing['category'] ?? '') === 'Uncategorized'): ?>
+                        <option value="Uncategorized" selected>Uncategorized</option>
+                    <?php endif; ?>
+                </select>
+                <p class="form-text">
+                    An image file does not say what it is. Classifying it here is what lets a
+                    reviewer judge whether the artwork suits the
+                    <?= e(strtolower($opt['singular'])) ?> it claims to be.
+                </p>
             </div>
 
             <div class="field-group">

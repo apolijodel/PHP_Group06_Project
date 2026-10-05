@@ -96,11 +96,30 @@ if ($product['is_customizable']) {
         if ($designId !== null && !$approvedOption('designs', 'design_id', $designId)) {
             $designId = null;
         }
-        // Same ceiling as design_save.php — the studio posts to both.
-        $customText = trim($_POST['custom_text'] ?? '');
-        $customText = $customText !== '' ? mb_substr($customText, 0, CUSTOM_TEXT_MAX) : null;
+        /* Personalized text was removed from the studio. The column stays, and
+           saved designs and past orders that hold text still display it, but
+           nothing new is accepted here - a posted custom_text is ignored
+           rather than stored. */
+        $customText = null;
 
-        if (!empty($_FILES['custom_image']['name'])) {
+        $hasPhoto = !empty($_FILES['custom_image']['name']);
+
+        /* A design and a photo occupy the same face of the bookmark, so the two
+           cannot be ordered together. The studio enforces this by disabling the
+           step that does not apply; this is the check that actually counts,
+           because a direct POST never touches that JavaScript. Refused outright
+           rather than silently dropping one, since guessing which the shopper
+           meant is how you print the wrong bookmark. */
+        if ($hasPhoto && $designId !== null) {
+            flash_set(
+                'error',
+                'A bookmark can carry a design or your photo, not both. '
+                . 'Choose one style and try again.'
+            );
+            redirect('/customer/product.php?id=' . $productId);
+        }
+
+        if ($hasPhoto) {
             try {
                 $customImagePath = handle_image_upload($_FILES['custom_image'], __DIR__ . '/../uploads/customizations');
             } catch (RuntimeException $e) {

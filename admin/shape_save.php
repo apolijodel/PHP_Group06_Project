@@ -28,6 +28,27 @@ if ($name === '') {
     redirect('/admin/shapes.php');
 }
 
+/* The type is required and must be one we offer. An image file carries no
+   statement about what it depicts, so this is the structured answer a reviewer
+   judges the artwork against - and a value from outside the list is refused
+   rather than written through. */
+$categories = ['Classic', 'Animal', 'Nature', 'Geometric', 'Seasonal', 'Novelty'];
+$category = trim((string)($_POST['category'] ?? ''));
+if (!in_array($category, $categories, true)) {
+    // An existing row being renamed keeps whatever it already had.
+    $keep = null;
+    if ($id) {
+        $cs = db()->prepare('SELECT category FROM shapes WHERE shape_id = :id');
+        $cs->execute(['id' => $id]);
+        $keep = $cs->fetchColumn() ?: null;
+    }
+    if ($keep === null) {
+        flash_set('error', 'Choose a shape type.');
+        redirect('/admin/shapes.php');
+    }
+    $category = $keep;
+}
+
 $imagePath = null;
 $scanned = false;
 if (!empty($_FILES['image']['name'])) {
@@ -54,29 +75,30 @@ try {
             // status was.
             $pdo->prepare(
                 'UPDATE shapes
-                    SET name = :name, image_path = :img, status = \'pending\',
+                    SET name = :name, category = :category, image_path = :img, status = \'pending\',
                         uploaded_by = :uploader, virus_scanned = :scanned,
                         reviewed_by = NULL, reviewed_at = NULL, review_note = NULL
                   WHERE shape_id = :id'
             )->execute([
-                'name' => $name, 'img' => $imagePath, 'uploader' => $uploader,
+                'name' => $name, 'category' => $category,
+                'img' => $imagePath, 'uploader' => $uploader,
                 'scanned' => $scanned ? 1 : 0, 'id' => $id,
             ]);
             $message = 'Shape image replaced — it is pending review.';
             $action = 'shape.updated';
         } else {
-            $pdo->prepare('UPDATE shapes SET name = :name WHERE shape_id = :id')
-                ->execute(['name' => $name, 'id' => $id]);
+            $pdo->prepare('UPDATE shapes SET name = :name, category = :category WHERE shape_id = :id')
+                ->execute(['name' => $name, 'category' => $category, 'id' => $id]);
             $message = 'Shape renamed.';
             $action = 'shape.updated';
         }
         $entityId = $id;
     } else {
         $pdo->prepare(
-            'INSERT INTO shapes (name, image_path, status, uploaded_by, virus_scanned)
-             VALUES (:name, :img, \'pending\', :uploader, :scanned)'
+            'INSERT INTO shapes (name, category, image_path, status, uploaded_by, virus_scanned)
+             VALUES (:name, :category, :img, \'pending\', :uploader, :scanned)'
         )->execute([
-            'name' => $name, 'img' => $imagePath,
+            'name' => $name, 'category' => $category, 'img' => $imagePath,
             'uploader' => $uploader, 'scanned' => $scanned ? 1 : 0,
         ]);
         $entityId = (int)$pdo->lastInsertId();

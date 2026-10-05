@@ -13,6 +13,9 @@ $opt = [
     'saveAction' => 'shape_save.php',
     'deleteAction' => 'shape_delete.php',
     'icon' => 'shapes',
+    /* A controlled vocabulary, not free text: the point of asking is that
+       the answers can be compared and filtered later. */
+    'categories' => ['Classic', 'Animal', 'Nature', 'Geometric', 'Seasonal', 'Novelty'],
 ];
 require __DIR__ . '/includes/option_manager.php';
 

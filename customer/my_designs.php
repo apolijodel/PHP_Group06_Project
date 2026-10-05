@@ -82,8 +82,18 @@ require __DIR__ . '/../includes/customer/header.php';
                                          src="<?= e(upload_url('customizations', $d['custom_image_path'])) ?>"
                                          alt="" loading="lazy">
                                 <?php endif; ?>
-                                <span class="bm-pattern" style="--bm-pattern:<?= $pattern ?>" aria-hidden="true"></span>
-                                <span class="bm-text"><?= e($d['custom_text'] ?: '') ?></span>
+                                <?php /* Rendered only when the saved design actually has one.
+                                         The layer flexes to fill the bookmark face, so an empty
+                                         one would take the space the photo should have. */ ?>
+                                <?php if ($d['design_image']): ?>
+                                    <span class="bm-pattern show" style="--bm-pattern:<?= $pattern ?>"
+                                          aria-hidden="true"></span>
+                                <?php endif; ?>
+                                <?php /* Personalized text was retired from the studio, but designs
+                                         saved before then still hold theirs and it is still shown. */ ?>
+                                <?php if (!empty($d['custom_text'])): ?>
+                                    <span class="bm-text"><?= e($d['custom_text']) ?></span>
+                                <?php endif; ?>
                             </div>
                         </div>
 

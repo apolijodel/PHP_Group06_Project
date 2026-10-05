@@ -174,8 +174,17 @@ function handle_image_upload(array $file, string $targetDir, ?bool &$scanned = n
 
     // Decoding it proves it is an image; it also stops a "decompression bomb"
     // from being stored and later opened by something that tries to render it.
-    if ($size[0] < 1 || $size[1] < 1 || $size[0] > 6000 || $size[1] > 6000) {
-        throw new RuntimeException('Image dimensions must be between 1 and 6000 pixels.');
+    /* A 1x1 pixel is a perfectly valid PNG and a useless bookmark. The floor
+       is what makes "it is an image" mean "it could actually be printed"; the
+       ceiling keeps a decompression bomb out of the uploads directory. */
+    if ($size[0] < MIN_UPLOAD_PIXELS || $size[1] < MIN_UPLOAD_PIXELS) {
+        throw new RuntimeException(
+            'That image is only ' . $size[0] . ' by ' . $size[1] . ' pixels. '
+            . 'Artwork must be at least ' . MIN_UPLOAD_PIXELS . ' pixels on each side.'
+        );
+    }
+    if ($size[0] > 6000 || $size[1] > 6000) {
+        throw new RuntimeException('Image dimensions must be 6000 pixels or fewer on each side.');
     }
 
     // Malware check before anything is written to a served directory.

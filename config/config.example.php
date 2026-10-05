@@ -13,6 +13,9 @@ define('BASE_URL', 'http://localhost/markme');
 
 // Upload constraints
 define('MAX_UPLOAD_BYTES', 2 * 1024 * 1024); // 2MB
+// Smallest artwork that could actually be printed on a bookmark. Anything
+// below this is a valid image file but not a usable shape or design.
+define('MIN_UPLOAD_PIXELS', 120);
 define('ALLOWED_IMAGE_EXT', ['jpg', 'jpeg', 'png', 'webp']);
 define('ALLOWED_IMAGE_MIME', ['image/jpeg', 'image/png', 'image/webp']);
 

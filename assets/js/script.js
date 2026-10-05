@@ -348,8 +348,6 @@ if (studio) {
   const preview = $("#bmPreview");
   const bmPattern = $("#bmPattern");
   const bmPhoto = $("#bmPhoto");
-  const bmText = $("#bmText");
-  const textPlaceholder = bmText?.dataset.placeholder || "Your text appears here";
 
   const setSummary = (key, value) => {
     const el = $(`[data-summary="${key}"]`);
@@ -372,6 +370,9 @@ if (studio) {
   const applyDesign = (radio) => {
     if (bmPattern && radio.dataset.img) {
       bmPattern.style.setProperty("--bm-pattern", `url("${radio.dataset.img}")`);
+      // The layer is hidden until something is actually chosen, so that an
+      // unused one does not take up the face.
+      bmPattern.classList.add("show");
     }
     setSummary("design", radio.dataset.name || "—");
   };
@@ -420,10 +421,15 @@ if (studio) {
       ];
     };
 
-    // Keep the bookmark's text legible whatever colour is chosen.
+    // Keep whatever sits on the bookmark legible against the chosen colour.
     const readableInk = (r, g, b) =>
       (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.62 ? "#1f1d1a" : "#ffffff";
 
+    /* The colour well holds the current value. The hex field and the palette
+       write into it rather than keeping parallel copies, which is what the
+       three-way sliders/hex/swatch arrangement used to do - and drift between
+       three sources is exactly how that ended up showing one colour in the
+       field and another on the preview. */
     const apply = (r, g, b, { skipWell = false, skipHex = false } = {}) => {
       r = clamp(r); g = clamp(g); b = clamp(b);
       const hex = toHex(r, g, b);
@@ -434,6 +440,7 @@ if (studio) {
       if (!skipWell && well) well.value = hex;
       if (!skipHex && hexInput) hexInput.value = hex.toUpperCase();
 
+      // The RGB views follow whatever the value became.
       ["r", "g", "b"].forEach((ch, i) => {
         const v = [r, g, b][i];
         const num = numFor(ch);
@@ -441,9 +448,17 @@ if (studio) {
         if (num && num.value !== String(v)) num.value = String(v);
         if (range && range.value !== String(v)) range.value = String(v);
       });
+
+      // Mark the matching preset, if the colour is one of them.
+      $$("[data-color-preset]", colorBox).forEach((btn) => {
+        btn.setAttribute(
+          "aria-pressed",
+          String(String(btn.dataset.colorPreset).toLowerCase() === hex.toLowerCase())
+        );
+      });
     };
 
-    const currentRGB = () => ["r", "g", "b"].map((ch) => clamp(parseInt(numFor(ch)?.value, 10)));
+    const currentRGB = () => parseHex(well?.value) || [47, 111, 94];
 
     well?.addEventListener("input", () => {
       const rgb = parseHex(well.value);
@@ -459,12 +474,15 @@ if (studio) {
       if (!parseHex(hexInput.value)) apply(...currentRGB());
     });
 
+    const fromRGBFields = () =>
+      ["r", "g", "b"].map((ch) => clamp(parseInt(numFor(ch)?.value, 10)));
+
     ["r", "g", "b"].forEach((ch) => {
-      numFor(ch)?.addEventListener("input", () => apply(...currentRGB()));
+      numFor(ch)?.addEventListener("input", () => apply(...fromRGBFields()));
       rangeFor(ch)?.addEventListener("input", () => {
         const num = numFor(ch);
         if (num) num.value = rangeFor(ch).value;
-        apply(...currentRGB());
+        apply(...fromRGBFields());
       });
     });
 
@@ -500,24 +518,90 @@ if (studio) {
 
 
 
-  /* --- personalized text --- */
-  const textInput = $("#custom_text");
-  const charCount = $("#charCount");
+  /* --- customization style ---
+     The style decides which step is available, and that is what keeps a design
+     and a photo from both being sent. The inactive step's inputs are disabled,
+     so they are not part of the form data at all rather than merely hidden -
+     a hidden-but-enabled field still posts. add_to_cart.php and design_save.php
+     reject the combination again regardless of what arrives. */
+  const modeRadios = $$("[data-mode]");
+  const stepFor = { design: $('[data-step="design"]'), photo: $('[data-step="photo"]') };
+  const designRadios = () => $$('input[name="design_id"]');
+  const photoInput = () => $("#custom_image");
 
-  const syncText = () => {
-    const value = textInput.value.trim();
-    if (bmText) {
-      bmText.textContent = value || textPlaceholder;
-      bmText.classList.toggle("is-placeholder", value === "");
+  const MODE_LABEL = { plain: "Plain", design: "With a design", photo: "With your photo" };
+
+  const applyMode = (mode, { clear = false } = {}) => {
+    Object.entries(stepFor).forEach(([key, el]) => {
+      if (!el) return;
+      const on = key === mode;
+      el.hidden = !on;
+      // Disabled, not just hidden: an enabled control still submits.
+      $$("input", el).forEach((i) => {
+        if (i.name === "remove_image") return;
+        i.disabled = !on;
+      });
+    });
+
+    if (clear) {
+      if (mode === "photo") {
+        const removeBox = $('input[name="remove_image"]');
+        if (removeBox) removeBox.checked = false;
+      }
+      if (mode !== "design") {
+        designRadios().forEach((r) => { r.checked = false; });
+        syncGroup("design_id");
+        /* applyDesign() paints through the --bm-pattern custom property, so
+           that is what has to be cleared. Clearing style.backgroundImage left
+           the design on the preview while a photo was added over it, which is
+           exactly the pair this picker exists to prevent. */
+        if (bmPattern) {
+          bmPattern.style.removeProperty("--bm-pattern");
+          bmPattern.classList.remove("show");
+        }
+        setSummary("design", "None");
+      }
+      if (mode !== "photo") {
+        const f = photoInput();
+        if (f) {
+          f.value = "";
+          f.closest("[data-dropzone]")?.querySelector("[data-dz-clear]")?.click();
+        }
+        if (bmPhoto) {
+          bmPhoto.classList.remove("show");
+          bmPhoto.removeAttribute("src");
+        }
+        // A saved design's stored photo goes too, or it would come back on save.
+        const removeBox = $('input[name="remove_image"]');
+        if (removeBox) removeBox.checked = true;
+        setSummary("photo", "None");
+      }
     }
-    if (charCount) {
-      charCount.textContent = textInput.value.length + " / " + textInput.maxLength + " characters";
-    }
-    setSummary("text", value || "None");
+
+    $$(".mode-card").forEach((card) => {
+      card.classList.toggle("selected", card.querySelector("[data-mode]")?.checked === true);
+    });
+
+    // The colour step is third when no style step is on screen, fourth when
+    // one is, so the numbers stay in sequence instead of skipping.
+    const colourNum = $('[data-step-num="colour"]');
+    if (colourNum) colourNum.textContent = mode === "plain" ? "3" : "4";
+
+    setSummary("mode", MODE_LABEL[mode] || "Plain");
   };
 
-  textInput?.addEventListener("input", syncText);
-  if (textInput) syncText();
+  modeRadios.forEach((radio) =>
+    radio.addEventListener("change", () => {
+      if (!radio.checked) return;
+      applyMode(radio.value, { clear: true });
+      stepFor[radio.value]?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    })
+  );
+
+  const startMode = $("[data-mode]:checked")?.value || "plain";
+  applyMode(startMode);
+  if (startMode !== "design") setSummary("design", "None");
+  if (startMode !== "photo") setSummary("photo", "None");
 }
 
 /* ------------------------------------------------------- payment selection */

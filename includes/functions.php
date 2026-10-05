@@ -825,3 +825,76 @@ function time_ago(string $timestamp): string
 
     return 'just now';
 }
+
+/**
+ * Readable device, operating system and browser, derived from a User-Agent.
+ *
+ * Deliberately conservative. A User-Agent is a self-reported string that
+ * anyone can set, and modern ones are deliberately vague — Safari on an iPad
+ * says it is a Mac, and every Chromium browser claims to be several others at
+ * once. So this reports only what the string actually supports and says
+ * "Unknown" otherwise, rather than inventing a hardware model nobody can
+ * verify. It is a convenience for reading the log, never evidence.
+ *
+ * Order matters: the specific brands are tested before the engines they are
+ * built on, because Edge also says "Chrome" and Chrome also says "Safari".
+ *
+ * @return array{device: string, os: string, browser: string}
+ */
+function user_agent_summary(?string $ua): array
+{
+    $ua = trim((string)$ua);
+    if ($ua === '') {
+        return ['device' => 'Unknown', 'os' => 'Unknown', 'browser' => 'Unknown'];
+    }
+
+    // ---- browser: most specific first -----------------------------------
+    $browser = 'Unknown';
+    foreach ([
+        'Edge' => '/\bEdgA?\/|\bEdg\//i',
+        'Opera' => '/\bOPR\/|\bOpera\//i',
+        'Samsung Internet' => '/\bSamsungBrowser\//i',
+        'Firefox' => '/\bFirefox\/|\bFxiOS\//i',
+        'Chrome' => '/\bChrome\/|\bCriOS\//i',
+        'Safari' => '/\bSafari\//i',
+    ] as $name => $pattern) {
+        if (preg_match($pattern, $ua)) {
+            $browser = $name;
+            break;
+        }
+    }
+    if ($browser === 'Unknown' && preg_match('/\bcurl\/|\bWget\//i', $ua)) {
+        $browser = 'Command line';
+    }
+
+    // ---- operating system -----------------------------------------------
+    $os = 'Unknown';
+    foreach ([
+        'Android' => '/\bAndroid\b/i',
+        'iOS' => '/\biPhone\b|\biPad\b|\biPod\b/i',
+        'Windows' => '/\bWindows NT\b/i',
+        'macOS' => '/\bMac OS X\b|\bMacintosh\b/i',
+        'Linux' => '/\bLinux\b|\bX11\b/i',
+    ] as $name => $pattern) {
+        if (preg_match($pattern, $ua)) {
+            $os = $name;
+            break;
+        }
+    }
+
+    // ---- device class ----------------------------------------------------
+    // "Mobile" in a UA means a phone-sized viewport; Android tablets omit it.
+    if (preg_match('/\biPad\b/i', $ua)
+        || (preg_match('/\bAndroid\b/i', $ua) && !preg_match('/\bMobile\b/i', $ua))
+        || preg_match('/\bTablet\b/i', $ua)) {
+        $device = 'Tablet';
+    } elseif (preg_match('/\bMobi|\bMobile\b|\biPhone\b|\biPod\b|\bWindows Phone\b/i', $ua)) {
+        $device = 'Mobile';
+    } elseif ($os === 'Unknown' && $browser === 'Command line') {
+        $device = 'Script';
+    } else {
+        $device = 'Desktop';
+    }
+
+    return ['device' => $device, 'os' => $os, 'browser' => $browser];
+}

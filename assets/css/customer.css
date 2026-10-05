@@ -1181,7 +1181,7 @@
   aspect-ratio: 1 / 1;
   object-fit: cover;
   border-radius: var(--r-sm);
-  background: var(--cream-2);
+  background: var(--art-bg);
   display: block;
 }
 .option-thumb .option-name {
@@ -1507,27 +1507,42 @@
   flex: none;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
 }
+/* The face of the bookmark carries one thing: the customer's photo, or one of
+   our designs, or nothing. They are mutually exclusive styles now, so whichever
+   is in use fills the face.
+
+   This used to be a fixed 1:1 square pinned to the top. That made sense when a
+   bookmark stacked a photo, a pattern and a line of text; with text gone and
+   the styles exclusive it left the photo at about a third of the height with
+   the rest of the bookmark empty. */
 .bm-photo {
   width: 100%;
-  aspect-ratio: 1 / 1;
+  flex: 1 1 auto;
+  min-height: 0;
   object-fit: cover;
   border-radius: 4px;
   border: 2px solid rgba(255, 255, 255, 0.7);
   display: none;
-  flex: none;
 }
 .bm-photo.show {
   display: block;
 }
+/* Hidden until a design is actually chosen. It used to stay in the layout
+   whatever the style was, and because it flexes it kept claiming its share of
+   the face - which is what squeezed the photo into a corner. */
 .bm-pattern {
   width: 100%;
   flex: 1 1 auto;
-  min-height: 40px;
+  min-height: 0;
   border-radius: 4px;
   opacity: 0.35;
   background-image: var(--bm-pattern, none);
   background-size: cover;
   background-position: center;
+  display: none;
+}
+.bm-pattern.show {
+  display: block;
 }
 .bm-text {
   width: 100%;
@@ -2257,7 +2272,7 @@
   aspect-ratio: 4 / 3;
   display: grid;
   place-items: center;
-  background: linear-gradient(160deg, var(--cream-2), var(--surface));
+  background: var(--art-bg);
   border-bottom: 1px solid var(--border);
   padding: var(--s-4);
 }
@@ -3573,18 +3588,22 @@ body.no-scroll {
   font-variant-numeric: tabular-nums;
 }
 
+/* RGB, alongside the colour well and the hex field. All three are views of one
+   value rather than three stores: apply() writes to every view each time, so
+   they cannot drift the way the old arrangement did. */
 .rgb-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--s-3);
+  gap: var(--s-2);
+  margin-top: var(--s-3);
 }
 .rgb-field {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.25rem;
 }
 .rgb-field label {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -3593,24 +3612,12 @@ body.no-scroll {
 .rgb-field input[type="number"] {
   text-align: center;
   font-variant-numeric: tabular-nums;
-  padding-inline: 0.4rem;
+  padding-inline: 0.3rem;
 }
 .rgb-field input[type="range"] {
   width: 100%;
   accent-color: var(--accent-600);
   cursor: pointer;
-}
-
-.swatch-row-compact {
-  gap: var(--s-2);
-}
-.swatch-row-compact .swatch {
-  width: 40px;
-}
-.swatch-row-compact .swatch .dot {
-  width: 34px;
-  height: 34px;
-  margin-bottom: 0;
 }
 
 /* -------------------------- live line total --------------------------- */
@@ -3926,5 +3933,208 @@ body.no-scroll {
   .cart-item.is-saving .qty-stepper,
   .cart-drawer-item.is-saving .qty-stepper {
     transition: none;
+  }
+}
+
+/* ===================== customization style picker =======================
+   The first decision in the studio: what goes on the face of the bookmark.
+   Three cards rather than a dropdown, because each one needs a line of
+   explanation for the choice to mean anything.
+   ======================================================================== */
+.mode-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: var(--s-3);
+}
+.mode-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  cursor: pointer;
+  transition:
+    border-color var(--t-fast),
+    box-shadow var(--t-fast),
+    transform var(--t-fast);
+}
+.mode-card:hover {
+  border-color: var(--accent-300);
+  transform: translateY(-2px);
+}
+.mode-card input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.mode-card:focus-within {
+  outline: 2px solid var(--accent-600);
+  outline-offset: 2px;
+}
+.mode-card.selected {
+  border-color: var(--accent-600);
+  box-shadow: 0 0 0 1px var(--accent-600) inset;
+}
+.mode-icon {
+  color: var(--accent-600);
+}
+.mode-label {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.mode-blurb {
+  font-size: 0.8rem;
+  color: var(--ink-3);
+  line-height: 1.4;
+}
+.mode-card .check {
+  position: absolute;
+  top: var(--s-3);
+  right: var(--s-3);
+  width: 20px;
+  height: 20px;
+  border-radius: var(--r-pill);
+  background: var(--accent-600);
+  color: #fff;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.mode-card.selected .check {
+  display: inline-flex;
+}
+
+/* Why the other step is unavailable, said once, where the choice is made. */
+.step-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  margin: 0 0 var(--s-4);
+  padding: var(--s-3);
+  border-radius: var(--r-sm);
+  background: var(--cream-2);
+  color: var(--ink-2);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+.step-note .mm-icon {
+  flex: none;
+  color: var(--accent-600);
+  margin-top: 1px;
+}
+
+/* ========================== colour palette ==============================
+   A grid rather than a wrapping row, so the swatches line up in columns
+   instead of drifting into ragged rows at every width.
+   ======================================================================== */
+/* Label beside its colours rather than above them: each group becomes one
+   line, which halves the height of the step and uses the width the stacked
+   version was leaving empty on the right. */
+.swatch-group {
+  display: grid;
+  grid-template-columns: 62px 1fr;
+  align-items: center;
+  gap: var(--s-3);
+}
+.swatch-group + .swatch-group {
+  margin-top: 0.45rem;
+}
+.swatch-group-name {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+/* The palette's swatches are <button>s, where the original .swatch was a
+   <label>. A button carries the browser's own chrome - grey fill, 2px outset
+   border, padding - which the .swatch rule never had to reset, and at 28px
+   that chrome reads as a square box around each dot. */
+.swatch-grid .swatch {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  line-height: 0;
+}
+
+.swatch-grid {
+  display: grid;
+  /* Fixed-size dots that pack from the left, rather than seven columns
+     stretched to the panel width - stretching is what made the swatches
+     enormous on a wide screen. */
+  grid-template-columns: repeat(auto-fill, 28px);
+  gap: 0.4rem;
+}
+.swatch-grid .swatch {
+  width: 28px;
+}
+.swatch-grid .swatch .dot {
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  border-radius: var(--r-pill);
+  box-shadow: inset 0 0 0 2px var(--surface);
+}
+.swatch-grid .swatch[aria-pressed="true"] .dot {
+  box-shadow:
+    inset 0 0 0 2px var(--surface),
+    0 0 0 2px var(--accent-600);
+}
+.swatch-grid .swatch:focus-visible {
+  outline: 2px solid var(--accent-600);
+  outline-offset: 3px;
+  border-radius: var(--r-pill);
+}
+
+/* The custom-colour group holds a form rather than a row of dots, so it goes
+   back to stacking under its label. */
+.swatch-group:has(.color-pick-row) {
+  display: block;
+}
+.swatch-group:has(.color-pick-row) .swatch-group-name {
+  margin-bottom: 0.4rem;
+}
+
+.color-hex-field {
+  flex: 1;
+  min-width: 0;
+}
+.color-hex-field .form-label {
+  margin-bottom: 0.25rem;
+}
+
+@media (max-width: 560px) {
+  /* Stacked again on a phone, where 62px of label leaves too little room. */
+  .swatch-group {
+    display: block;
+  }
+  .swatch-group-name {
+    margin-bottom: 0.3rem;
+  }
+  /* Bigger targets on touch, still packing to the available width. */
+  .swatch-grid {
+    grid-template-columns: repeat(auto-fill, 34px);
+  }
+  .swatch-grid .swatch,
+  .swatch-grid .swatch .dot {
+    width: 34px;
+  }
+  .swatch-grid .swatch .dot {
+    height: 34px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mode-card,
+  .mode-card:hover {
+    transition: none;
+    transform: none;
   }
 }

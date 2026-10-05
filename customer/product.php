@@ -51,14 +51,50 @@ $relatedStmt = db()->prepare(
 $relatedStmt->execute(['cat' => $product['category_id'], 'id' => $productId]);
 $related = $relatedStmt->fetchAll();
 
-// Preview tints: help a customer picture the bookmark. Not an order option —
-// cart_items has no colour column, so nothing here is submitted or promised.
-$tints = [
-    ['#2f6f5e', 'Forest'],
-    ['#bd5518', 'Terracotta'],
-    ['#d9a441', 'Gold'],
-    ['#1f1d1a', 'Charcoal'],
-    ['#8a6f9e', 'Lilac'],
+/* Preview tints: help a customer picture the bookmark. Not an order option —
+   cart_items has no colour column, so nothing here is submitted or promised.
+
+   Grouped rather than listed, so the palette reads as a palette: a row of
+   neutrals, a row of warms, a row of cools, a row of pastels. Four rows of
+   seven is enough range to find something close without becoming a paint
+   catalog, and the custom picker underneath covers everything else. */
+$palette = [
+    'Neutrals' => [
+        ['#ffffff', 'White'],
+        ['#faf6ef', 'Cream'],
+        ['#ece4d7', 'Beige'],
+        ['#c9c2b6', 'Stone'],
+        ['#8d8779', 'Taupe'],
+        ['#4a4740', 'Slate grey'],
+        ['#1f1d1a', 'Charcoal'],
+    ],
+    'Warm' => [
+        ['#b3261e', 'Crimson'],
+        ['#d2452c', 'Poppy'],
+        ['#bd5518', 'Terracotta'],
+        ['#e07a28', 'Amber'],
+        ['#d9a441', 'Gold'],
+        ['#8a5a2b', 'Chestnut'],
+        ['#5d4037', 'Cocoa'],
+    ],
+    'Cool' => [
+        ['#2f6f5e', 'Forest'],
+        ['#4f9d7e', 'Sage'],
+        ['#1f6f8b', 'Teal'],
+        ['#2c5aa0', 'Navy'],
+        ['#4a6fd4', 'Cornflower'],
+        ['#6b4fa8', 'Violet'],
+        ['#9c3f78', 'Mulberry'],
+    ],
+    'Pastel' => [
+        ['#f7d9d9', 'Blush'],
+        ['#fae3c4', 'Apricot'],
+        ['#f6f0bd', 'Butter'],
+        ['#d6ecd2', 'Mint'],
+        ['#cfe4f2', 'Sky'],
+        ['#ded5f0', 'Lavender'],
+        ['#f3d4e6', 'Rose'],
+    ],
 ];
 
 // Routed through upload_url() like every other /uploads reference: it
@@ -88,8 +124,15 @@ if ($isCustom && $savedDesignId > 0 && is_logged_in()) {
 }
 
 /** True when this option should start selected. */
+/* A shape is always part of the bookmark, so the first one is pre-selected to
+   give the preview something to draw. A design is not: the studio opens in the
+   Plain style, and pre-ticking a design there would show the shopper a choice
+   they have not made and cannot see the step for. */
 $isChosen = static function (?int $savedValue, int $optionId, int $index) use ($savedDesign): bool {
     return $savedDesign ? $savedValue === $optionId : $index === 0;
+};
+$isChosenDesign = static function (?int $savedValue, int $optionId) use ($savedDesign): bool {
+    return $savedDesign ? $savedValue === $optionId : false;
 };
 
 $pageTitle = $product['name'];
@@ -269,14 +312,71 @@ require __DIR__ . '/../includes/customer/header.php';
 
             <!-- ----------------------- controls ----------------------- -->
             <div class="studio-steps">
+
+                <?php /* The one decision that shapes the rest of the form.
+                         A bookmark carries our artwork, or the customer's photo,
+                         or neither - never both, because they occupy the same
+                         face. Picking a style here is what enforces that, rather
+                         than letting someone choose both and discovering the
+                         conflict at checkout. The server checks it again. */ ?>
+                <fieldset class="studio-card" data-mode-picker>
+                    <legend class="visually-hidden">Choose your style</legend>
+                    <div class="studio-card-head">
+                        <span class="studio-step-num" aria-hidden="true">1</span>
+                        <h3>Choose your style</h3>
+                    </div>
+
+                    <div class="mode-grid">
+                        <?php
+                        $modes = [
+                            'plain' => [
+                                'Plain',
+                                'Just the shape and colour. Nothing printed on the face.',
+                                'bookmark',
+                            ],
+                            'design' => [
+                                'With a design',
+                                'One of our designs printed on it. No photo.',
+                                'palette',
+                            ],
+                            'photo' => [
+                                'With your photo',
+                                'Your own picture printed on it. No design.',
+                                'image',
+                            ],
+                        ];
+                        /* An existing saved design opens in whichever style it was
+                           saved as, worked out from what it actually holds. */
+                        $currentMode = 'plain';
+                        if ($savedDesign) {
+                            if (!empty($savedDesign['custom_image_path'])) {
+                                $currentMode = 'photo';
+                            } elseif (!empty($savedDesign['design_id'])) {
+                                $currentMode = 'design';
+                            }
+                        }
+                        foreach ($modes as $value => [$label, $blurb, $ico]):
+                        ?>
+                            <label class="mode-card <?= $currentMode === $value ? 'selected' : '' ?>">
+                                <input type="radio" name="custom_mode" value="<?= $value ?>"
+                                       data-mode <?= $currentMode === $value ? 'checked' : '' ?>>
+                                <span class="mode-icon" aria-hidden="true"><?= icon($ico, 20) ?></span>
+                                <span class="mode-label"><?= e($label) ?></span>
+                                <span class="mode-blurb"><?= e($blurb) ?></span>
+                                <span class="check" aria-hidden="true"><?= icon('check', 13) ?></span>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </fieldset>
+
                 <fieldset class="studio-card">
                     <legend class="visually-hidden">Choose your shape</legend>
                     <div class="studio-card-head">
-                        <span class="studio-step-num" aria-hidden="true">1</span>
+                        <span class="studio-step-num" aria-hidden="true">2</span>
                         <h3>Choose your shape</h3>
                         <span class="hint"><?= count($shapes) ?> options</span>
                     </div>
-                                        <?php /* Four at a time rather than a wall of options. Every option is
+                    <?php /* Four at a time rather than a wall of options. Every option is
                              still rendered and still a radio in this form, so the preview
                              and the submitted value are unchanged - the carousel only
                              controls how many are on screen. */ ?>
@@ -287,7 +387,6 @@ require __DIR__ . '/../includes/customer/header.php';
                                 aria-label="Previous shapes"><?= icon('chevron-left', 17) ?></button>
                         <div class="carousel-viewport">
                             <div class="carousel-track" data-carousel-track>
-
                         <?php foreach ($shapes as $i => $shape): ?>
                             <?php $chosen = $isChosen(
                                 isset($savedDesign['shape_id']) ? (int)$savedDesign['shape_id'] : null,
@@ -309,19 +408,22 @@ require __DIR__ . '/../includes/customer/header.php';
                         <button type="button" class="carousel-nav next" data-carousel-next
                                 aria-label="More shapes"><?= icon('chevron-right', 17) ?></button>
                     </div>
-</fieldset>
+                </fieldset>
 
-                <fieldset class="studio-card">
+                <?php /* Shown only in "with a design" style. The inputs are disabled
+                         while it is hidden, so a design cannot be submitted alongside
+                         a photo even from a stale page. */ ?>
+                <fieldset class="studio-card" data-step="design" <?= $currentMode === 'design' ? '' : 'hidden' ?>>
                     <legend class="visually-hidden">Choose your design</legend>
                     <div class="studio-card-head">
-                        <span class="studio-step-num" aria-hidden="true">2</span>
+                        <span class="studio-step-num" aria-hidden="true">3</span>
                         <h3>Choose your design</h3>
                         <span class="hint"><?= count($designs) ?> options</span>
                     </div>
-                                        <?php /* Four at a time rather than a wall of options. Every option is
-                             still rendered and still a radio in this form, so the preview
-                             and the submitted value are unchanged - the carousel only
-                             controls how many are on screen. */ ?>
+                    <p class="step-note" data-exclusive-note>
+                        <?= icon('info', 15) ?>
+                        <span>A design is selected, so photo customization cannot be used.</span>
+                    </p>
                     <div class="carousel option-carousel" data-carousel
                          data-per-view="4 3 2" data-min-card="104"
                          data-carousel-item=".option-thumb">
@@ -329,12 +431,10 @@ require __DIR__ . '/../includes/customer/header.php';
                                 aria-label="Previous designs"><?= icon('chevron-left', 17) ?></button>
                         <div class="carousel-viewport">
                             <div class="carousel-track" data-carousel-track>
-
                         <?php foreach ($designs as $i => $design): ?>
-                            <?php $chosen = $isChosen(
+                            <?php $chosen = $isChosenDesign(
                                 isset($savedDesign['design_id']) ? (int)$savedDesign['design_id'] : null,
-                                (int)$design['design_id'],
-                                $i
+                                (int)$design['design_id']
                             ); ?>
                             <label class="option-thumb <?= $chosen ? 'selected' : '' ?>">
                                 <input type="radio" name="design_id" value="<?= (int)$design['design_id'] ?>"
@@ -351,14 +451,18 @@ require __DIR__ . '/../includes/customer/header.php';
                         <button type="button" class="carousel-nav next" data-carousel-next
                                 aria-label="More designs"><?= icon('chevron-right', 17) ?></button>
                     </div>
-</fieldset>
+                </fieldset>
 
-                <div class="studio-card">
+                <?php /* Shown only in "with your photo" style, for the same reason. */ ?>
+                <div class="studio-card" data-step="photo" <?= $currentMode === 'photo' ? '' : 'hidden' ?>>
                     <div class="studio-card-head">
                         <span class="studio-step-num" aria-hidden="true">3</span>
-                        <h3>Upload your image</h3>
-                        <span class="hint">Optional</span>
+                        <h3>Add your photo</h3>
                     </div>
+                    <p class="step-note" data-exclusive-note>
+                        <?= icon('info', 15) ?>
+                        <span>Photo customization is selected, so a design cannot be applied.</span>
+                    </p>
                     <div data-dropzone data-max-bytes="<?= MAX_UPLOAD_BYTES ?>"
                          data-accept="jpg,jpeg,png,webp">
                         <label class="dropzone" for="custom_image">
@@ -394,74 +498,69 @@ require __DIR__ . '/../includes/customer/header.php';
                     <?php endif; ?>
                 </div>
 
-                <div class="studio-card">
-                    <div class="studio-card-head">
-                        <span class="studio-step-num" aria-hidden="true">4</span>
-                        <h3>Add your text</h3>
-                        <span class="hint">Optional</span>
-                    </div>
-                    <label class="form-label" for="custom_text">
-                        Personalized text <span class="optional">&mdash; a name, quote or short dedication</span>
-                    </label>
-                    <input type="text" id="custom_text" name="custom_text" class="form-control"
-                           maxlength="<?= CUSTOM_TEXT_MAX ?>" placeholder="e.g. Just One More..."
-                           value="<?= e($savedDesign['custom_text'] ?? '') ?>">
-                    <p class="char-count" id="charCount" aria-live="polite">
-                        0 / <?= CUSTOM_TEXT_MAX ?> characters
-                    </p>
-                    <p class="form-text">A bookmark has room for a short line. Anything longer is trimmed to
-                        <?= CUSTOM_TEXT_MAX ?> characters when it is saved.</p>
-                </div>
-
                 <fieldset class="studio-card">
                     <legend class="visually-hidden">Preview colour</legend>
                     <div class="studio-card-head">
-                        <span class="studio-step-num" aria-hidden="true">5</span>
+                        <span class="studio-step-num" aria-hidden="true" data-step-num="colour">4</span>
                         <h3>Choose your colour</h3>
                         <span class="hint">Preview only</span>
                     </div>
 
                     <div class="color-controls" data-color-picker>
-                        <div class="color-pick-row">
-                            <label class="visually-hidden" for="colorWell">Pick a colour</label>
-                            <input type="color" id="colorWell" class="color-well" value="#2f6f5e" data-color-well>
-
-                            <div>
-                                <label class="form-label" for="colorHex" style="margin-bottom:.25rem">Hex</label>
-                                <input type="text" id="colorHex" class="form-control color-hex"
-                                       value="#2F6F5E" maxlength="7" spellcheck="false"
-                                       data-color-hex>
-                            </div>
-                        </div>
-
-                        <div class="rgb-grid">
-                            <?php foreach ([['r', 'Red', 47], ['g', 'Green', 111], ['b', 'Blue', 94]] as [$ch, $chLabel, $chVal]): ?>
-                                <div class="rgb-field">
-                                    <label for="rgb<?= $ch ?>"><?= e($chLabel) ?></label>
-                                    <input type="number" id="rgb<?= $ch ?>" min="0" max="255" step="1"
-                                           value="<?= $chVal ?>" class="form-control" data-rgb="<?= $ch ?>">
-                                    <input type="range" min="0" max="255" step="1" value="<?= $chVal ?>"
-                                           aria-label="<?= e($chLabel) ?> amount" tabindex="-1"
-                                           data-rgb-range="<?= $ch ?>">
+                        <?php foreach ($palette as $groupName => $swatches): ?>
+                            <div class="swatch-group">
+                                <p class="swatch-group-name"><?= e($groupName) ?></p>
+                                <div class="swatch-grid" role="group"
+                                     aria-label="<?= e($groupName) ?> colours">
+                                    <?php foreach ($swatches as [$hex, $name]): ?>
+                                        <button type="button" class="swatch"
+                                                data-color-preset="<?= e($hex) ?>"
+                                                title="<?= e($name) ?>" aria-pressed="false">
+                                            <span class="dot" style="background:<?= e($hex) ?>"
+                                                  aria-hidden="true"></span>
+                                            <span class="visually-hidden"><?= e($name) ?></span>
+                                        </button>
+                                    <?php endforeach; ?>
                                 </div>
-                            <?php endforeach; ?>
-                        </div>
+                            </div>
+                        <?php endforeach; ?>
 
-                        <!-- Quick starting points; the controls above are the real picker. -->
-                        <div class="swatch-row swatch-row-compact" role="group" aria-label="Preset colours">
-                            <?php foreach ($tints as [$hex, $name]): ?>
-                                <button type="button" class="swatch" data-color-preset="<?= e($hex) ?>"
-                                        title="<?= e($name) ?>">
-                                    <span class="dot" style="background:<?= e($hex) ?>" aria-hidden="true"></span>
-                                    <span class="visually-hidden"><?= e($name) ?></span>
-                                </button>
-                            <?php endforeach; ?>
+                        <div class="swatch-group">
+                            <p class="swatch-group-name">Custom colour</p>
+                            <div class="color-pick-row">
+                                <label class="visually-hidden" for="colorWell">Pick any colour</label>
+                                <input type="color" id="colorWell" class="color-well"
+                                       value="#2f6f5e" data-color-well>
+                                <div class="color-hex-field">
+                                    <label class="form-label" for="colorHex">Hex</label>
+                                    <input type="text" id="colorHex" class="form-control color-hex"
+                                           value="#2F6F5E" maxlength="7" spellcheck="false"
+                                           autocomplete="off" data-color-hex>
+                                </div>
+                            </div>
+
+                            <?php /* RGB alongside the well and the hex field. All three are
+                                     views of one value - whichever you move, the other two
+                                     follow - so there is no second source of truth to drift. */ ?>
+                            <div class="rgb-grid">
+                                <?php foreach ([['r', 'R', 47], ['g', 'G', 111], ['b', 'B', 94]] as [$ch, $chLabel, $chVal]): ?>
+                                    <div class="rgb-field">
+                                        <label for="rgb<?= $ch ?>"><?= e($chLabel) ?></label>
+                                        <input type="number" id="rgb<?= $ch ?>" min="0" max="255" step="1"
+                                               value="<?= $chVal ?>" class="form-control form-control-sm"
+                                               autocomplete="off" data-rgb="<?= $ch ?>">
+                                        <input type="range" min="0" max="255" step="1" value="<?= $chVal ?>"
+                                               aria-label="<?= e($chLabel) ?> amount" tabindex="-1"
+                                               data-rgb-range="<?= $ch ?>">
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
                         </div>
                     </div>
 
                     <p class="form-text" style="margin-top:var(--s-3)">This colours the preview so you can
-                        picture the finished bookmark. The stock we print on follows the design chosen in
-                        step 2, so the colour is not part of the order.</p>
+                        picture the finished bookmark. The stock we print on follows your chosen style,
+                        so the colour is not part of the order.</p>
                 </fieldset>
             </div>
 
@@ -479,16 +578,14 @@ require __DIR__ . '/../includes/customer/header.php';
                         <span class="bm-hole" aria-hidden="true"></span>
                         <img class="bm-photo" id="bmPhoto" src="" alt="">
                         <span class="bm-pattern" id="bmPattern" aria-hidden="true"></span>
-                        <span class="bm-text is-placeholder" id="bmText"
-                              data-placeholder="Your text appears here">Your text appears here</span>
                     </div>
                 </div>
 
                 <div class="preview-summary">
+                    <div class="row-line"><span>Style</span><strong data-summary="mode">Plain</strong></div>
                     <div class="row-line"><span>Shape</span><strong data-summary="shape">&mdash;</strong></div>
                     <div class="row-line"><span>Design</span><strong data-summary="design">&mdash;</strong></div>
                     <div class="row-line"><span>Photo</span><strong data-summary="photo">None</strong></div>
-                    <div class="row-line"><span>Text</span><strong data-summary="text">None</strong></div>
                 </div>
 
                 <div class="preview-foot">
