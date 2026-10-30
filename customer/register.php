@@ -75,17 +75,22 @@ if ($errors) {
 // nothing reads.
 $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
-/* Two-factor is off until the account owner turns it on from Settings.
-   It was briefly switched on for every new account, which meant enrolling an
-   authenticator before you could use the account at all - a toll gate on the
-   way in rather than a protection someone chose. The enrolment flow itself
-   stays, reached from Settings, and auth/mfa_enrol.php still catches any
-   account left enabled without a usable factor. */
+
+/* MFA is required for every new customer account.
+   The authenticator secret remains NULL until the customer verifies
+   their first six-digit Google Authenticator code. */
 $stmt = db()->prepare(
-    'INSERT INTO users (role, username, email, password_hash, full_name, contact_number, address,
-                        is_active, password_changed_at)
-     VALUES (\'customer\', :username, :email, :hash, :full_name, :contact_number, :address, 0, NOW())'
+    'INSERT INTO users (
+        role, username, email, password_hash, full_name,
+        contact_number, address, is_active, password_changed_at,
+        mfa_enabled, mfa_method, mfa_secret
+    ) VALUES (
+        \'customer\', :username, :email, :hash, :full_name,
+        :contact_number, :address, 0, NOW(),
+        1, \'totp\', NULL
+    )'
 );
+
 $stmt->execute([
     'username' => $old['username'],
     'email' => $old['email'],

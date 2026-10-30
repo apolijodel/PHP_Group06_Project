@@ -752,8 +752,21 @@ function captcha_check(array $post): bool
 
 function mail_configured(): bool
 {
-    return defined('SMTP_HOST') && defined('SMTP_USER') && defined('SMTP_PASS')
-        && SMTP_HOST !== '' && SMTP_USER !== '' && SMTP_PASS !== '';
+    $mailjetReady = defined('MAILJET_API_KEY')
+        && defined('MAILJET_SECRET_KEY')
+        && defined('MAILJET_FROM_EMAIL')
+        && MAILJET_API_KEY !== ''
+        && MAILJET_SECRET_KEY !== ''
+        && filter_var(MAILJET_FROM_EMAIL, FILTER_VALIDATE_EMAIL);
+
+    $smtpReady = defined('SMTP_HOST')
+        && defined('SMTP_USER')
+        && defined('SMTP_PASS')
+        && SMTP_HOST !== ''
+        && SMTP_USER !== ''
+        && SMTP_PASS !== '';
+
+    return (bool) $mailjetReady || $smtpReady;
 }
 
 /**
@@ -767,6 +780,95 @@ function mail_configured(): bool
  *
  * @return array{sent: bool, reason: string, outbox: ?string}
  */
+function mailjet_deliver(
+    string $to,
+    string $subject,
+    string $bodyText,
+    ?string $bodyHtml = null
+): array {
+    if (!function_exists('curl_init')) {
+        return ['ok' => false, 'reason' => 'PHP cURL extension is unavailable.'];
+    }
+
+    if (!filter_var($to, FILTER_VALIDATE_EMAIL)
+        || preg_match('/[\r\n]/', $to)
+        || preg_match('/[\r\n]/', $subject)) {
+        return ['ok' => false, 'reason' => 'Invalid email address or subject.'];
+    }
+
+    $message = [
+        'From' => [
+            'Email' => MAILJET_FROM_EMAIL,
+            'Name' => 'MarkMe',
+        ],
+        'To' => [
+            [
+                'Email' => $to,
+            ],
+        ],
+        'Subject' => $subject,
+        'TextPart' => $bodyText,
+    ];
+
+    if ($bodyHtml !== null && $bodyHtml !== '') {
+        $message['HTMLPart'] = $bodyHtml;
+    }
+
+    $payload = json_encode([
+        'Messages' => [$message],
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+    if ($payload === false) {
+        return ['ok' => false, 'reason' => 'Could not encode email payload.'];
+    }
+
+    $ch = curl_init('https://api.mailjet.com/v3.1/send');
+
+    curl_setopt_array($ch, [
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => $payload,
+        CURLOPT_HTTPHEADER => [
+            'Content-Type: application/json',
+            'Accept: application/json',
+        ],
+        CURLOPT_USERPWD => MAILJET_API_KEY . ':' . MAILJET_SECRET_KEY,
+        CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CONNECTTIMEOUT => 10,
+        CURLOPT_TIMEOUT => 25,
+    ]);
+
+    $response = curl_exec($ch);
+    $curlError = curl_error($ch);
+    $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($response === false) {
+        return [
+            'ok' => false,
+            'reason' => 'Mailjet connection failed: ' . $curlError,
+        ];
+    }
+
+    $data = json_decode($response, true);
+
+    if ($status >= 200 && $status < 300
+        && isset($data['Messages'][0]['Status'])
+        && $data['Messages'][0]['Status'] === 'success') {
+        return ['ok' => true, 'reason' => ''];
+    }
+
+    // Return a useful error without exposing credentials.
+    $detail = $data['Messages'][0]['Errors'][0]['ErrorMessage']
+        ?? $data['ErrorMessage']
+        ?? ('Mailjet returned HTTP ' . $status . '.');
+
+    return [
+        'ok' => false,
+        'reason' => (string) $detail,
+    ];
+}
+
 function mail_send(
     string $to,
     string $subject,
@@ -778,12 +880,22 @@ function mail_send(
     if (!mail_configured()) {
         return [
             'sent' => false,
-            'reason' => 'SMTP is not configured (SMTP_HOST / SMTP_USER / SMTP_PASS in config.php).',
+            'reason' => 'Mail is not configured. Set Mailjet API credentials in the environment.',
             'outbox' => $outbox,
         ];
     }
 
-    $result = smtp_deliver($to, $subject, $bodyText, $bodyHtml);
+    // Prefer Mailjet over SMTP when its credentials are present.
+    $mailjetReady = defined('MAILJET_API_KEY')
+        && defined('MAILJET_SECRET_KEY')
+        && defined('MAILJET_FROM_EMAIL')
+        && MAILJET_API_KEY !== ''
+        && MAILJET_SECRET_KEY !== ''
+        && filter_var(MAILJET_FROM_EMAIL, FILTER_VALIDATE_EMAIL);
+
+    $result = $mailjetReady
+        ? mailjet_deliver($to, $subject, $bodyText, $bodyHtml)
+        : smtp_deliver($to, $subject, $bodyText, $bodyHtml);
 
     return [
         'sent' => $result['ok'],

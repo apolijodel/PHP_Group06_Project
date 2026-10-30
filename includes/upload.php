@@ -12,66 +12,166 @@ require_once __DIR__ . '/../config/config.php';
  * ClamAV exit codes: 0 = clean, 1 = infected, anything else = the scanner
  * itself failed, which is treated as "not scanned" rather than "clean".
  */
+
+/**
+ * Scan a file using Cloudmersive Virus Scan API.
+ *
+ * Returns:
+ * [
+ *     'scanned' => bool,
+ *     'clean'   => bool,
+ *     'detail'  => string
+ * ]
+ *
+ * Fail closed: API errors, missing API keys, invalid responses,
+ * and timeouts are all treated as scan failures.
+ */
 function av_scan(string $path): array
 {
-    $scanner = defined('AV_SCANNER') ? trim((string)AV_SCANNER) : '';
-    if ($scanner === '') {
-        return ['scanned' => false, 'clean' => false, 'detail' => 'No scanner configured.'];
-    }
-    if (!is_file($scanner) && !is_executable($scanner)) {
-        error_log('av_scan: AV_SCANNER is set but not usable: ' . $scanner);
-        return ['scanned' => false, 'clean' => false, 'detail' => 'Scanner not found.'];
-    }
+    $apiKey = trim((string)getenv('CLOUDMERSIVE_API_KEY'));
 
-    $timeout = defined('AV_TIMEOUT_SECONDS') ? (int)AV_TIMEOUT_SECONDS : 20;
-    $cmd = escapeshellarg($scanner) . ' --no-summary ' . escapeshellarg($path);
-
-    $descriptors = [1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
-    $proc = @proc_open($cmd, $descriptors, $pipes);
-    if (!is_resource($proc)) {
-        error_log('av_scan: could not start the scanner');
-        return ['scanned' => false, 'clean' => false, 'detail' => 'Scanner could not start.'];
+    if ($apiKey === '') {
+        error_log('av_scan: CLOUDMERSIVE_API_KEY is not configured.');
+        return [
+            'scanned' => false,
+            'clean' => false,
+            'detail' => 'API key not configured.'
+        ];
     }
 
-    stream_set_blocking($pipes[1], false);
-    stream_set_blocking($pipes[2], false);
-    $out = '';
-    $deadline = time() + max(1, $timeout);
-    do {
-        $out .= (string)stream_get_contents($pipes[1]);
-        $out .= (string)stream_get_contents($pipes[2]);
-        $status = proc_get_status($proc);
-        if (!$status['running']) {
-            break;
+    if (!function_exists('curl_init')) {
+        error_log('av_scan: PHP cURL extension is unavailable.');
+        return [
+            'scanned' => false,
+            'clean' => false,
+            'detail' => 'cURL extension unavailable.'
+        ];
+    }
+
+    if (!is_file($path) || !is_readable($path)) {
+        return [
+            'scanned' => false,
+            'clean' => false,
+            'detail' => 'File is missing or unreadable.'
+        ];
+    }
+
+    // Cloudmersive Free Tier maximum file size: 3.5 MB.
+    $maxApiBytes = (int)(3.5 * 1024 * 1024);
+
+    if (filesize($path) > $maxApiBytes) {
+        return [
+            'scanned' => false,
+            'clean' => false,
+            'detail' => 'File exceeds API size limit.'
+        ];
+    }
+
+    try {
+        $mime = mime_content_type($path) ?: 'application/octet-stream';
+
+        $file = new CURLFile(
+            $path,
+            $mime,
+            basename($path)
+        );
+
+        $ch = curl_init(
+            'https://api.cloudmersive.com/virus/scan/file'
+        );
+
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => [
+                'inputFile' => $file
+            ],
+            CURLOPT_HTTPHEADER => [
+                'Apikey: ' . $apiKey,
+                'Accept: application/json'
+            ],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_TIMEOUT => 45,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_FOLLOWLOCATION => false
+        ]);
+
+        $response = curl_exec($ch);
+        $curlError = curl_error($ch);
+        $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        curl_close($ch);
+
+        if ($response === false) {
+            error_log('av_scan: Cloudmersive request failed: ' . $curlError);
+
+            return [
+                'scanned' => false,
+                'clean' => false,
+                'detail' => 'API request failed.'
+            ];
         }
-        usleep(100000);
-    } while (time() < $deadline);
 
-    if ($status['running']) {
-        proc_terminate($proc);
-        proc_close($proc);
-        error_log('av_scan: scanner timed out');
-        return ['scanned' => false, 'clean' => false, 'detail' => 'Scanner timed out.'];
-    }
+        if ($httpCode !== 200) {
+            error_log(
+                'av_scan: Cloudmersive returned HTTP ' . $httpCode
+            );
 
-    foreach ($pipes as $pipe) {
-        if (is_resource($pipe)) {
-            fclose($pipe);
+            return [
+                'scanned' => false,
+                'clean' => false,
+                'detail' => 'API returned an unsuccessful status.'
+            ];
         }
-    }
-    $code = $status['exitcode'];
-    proc_close($proc);
 
-    if ($code === 0) {
-        return ['scanned' => true, 'clean' => true, 'detail' => 'No threat found.'];
-    }
-    if ($code === 1) {
-        return ['scanned' => true, 'clean' => false, 'detail' => 'Malware signature detected.'];
-    }
+        $result = json_decode($response, true);
 
-    error_log('av_scan: scanner returned ' . $code . ' - ' . trim($out));
-    return ['scanned' => false, 'clean' => false, 'detail' => 'Scanner error.'];
+        if (
+            !is_array($result) ||
+            !array_key_exists('CleanResult', $result) ||
+            !is_bool($result['CleanResult'])
+        ) {
+            error_log('av_scan: Invalid Cloudmersive response.');
+
+            return [
+                'scanned' => false,
+                'clean' => false,
+                'detail' => 'Invalid API response.'
+            ];
+        }
+
+        if ($result['CleanResult'] === true) {
+            return [
+                'scanned' => true,
+                'clean' => true,
+                'detail' => 'Cloudmersive found no threats.'
+            ];
+        }
+
+        error_log(
+            'av_scan: Cloudmersive detected a threat. '
+            . 'FoundViruses: '
+            . json_encode($result['FoundViruses'] ?? [])
+        );
+
+        return [
+            'scanned' => true,
+            'clean' => false,
+            'detail' => 'Malware or unsafe content detected.'
+        ];
+
+    } catch (Throwable $e) {
+        error_log('av_scan: ' . $e->getMessage());
+
+        return [
+            'scanned' => false,
+            'clean' => false,
+            'detail' => 'Scanner error.'
+        ];
+    }
 }
+
 
 /**
  * Apply the configured scanning policy, throwing if the file must not be kept.

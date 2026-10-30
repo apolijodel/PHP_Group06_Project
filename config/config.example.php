@@ -2,14 +2,23 @@
 // Copy this file to config.php and fill in real values for your environment.
 // config.php is gitignored so real credentials never get committed.
 
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'markme_db');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+define('DB_NAME', getenv('DB_NAME') ?: 'markme_db');
+define('DB_USER', getenv('DB_USER') ?: 'root');
+define('DB_PASS', getenv('DB_PASS') ?: '');
 define('DB_CHARSET', 'utf8mb4');
 
+
 // Base URL of the app as served by XAMPP, no trailing slash.
-define('BASE_URL', 'http://localhost/markme');
+
+define(
+    'BASE_URL',
+    rtrim(
+        getenv('BASE_URL') ?: 'http://localhost/markme',
+        '/'
+    )
+);
+
 
 // Upload constraints
 define('MAX_UPLOAD_BYTES', 2 * 1024 * 1024); // 2MB
@@ -29,9 +38,7 @@ define('ALLOWED_IMAGE_MIME', ['image/jpeg', 'image/png', 'image/webp']);
 // AV_REQUIRED decides what happens when no scanner is configured:
 //   true  - refuse every upload (fail closed; correct for a public server)
 //   false - accept the upload and record that it was not scanned
-define('AV_SCANNER', '');
-define('AV_REQUIRED', false);
-define('AV_TIMEOUT_SECONDS', 20);
+define('AV_REQUIRED', true);
 
 // ---------------------------------------------------------------------
 // PayMongo (https://docs.paymongo.com)
@@ -86,8 +93,25 @@ define('CUSTOM_TEXT_MAX', 20);
 
 // Google reCAPTCHA v2 ("I'm not a robot"). Get keys at
 // https://www.google.com/recaptcha/admin  -> register localhost.
-define('RECAPTCHA_SITE_KEY', '');
-define('RECAPTCHA_SECRET_KEY', '');
+
+define(
+    'RECAPTCHA_SITE_KEY',
+    getenv('RECAPTCHA_SITE_KEY') ?: ''
+);
+
+define(
+    'RECAPTCHA_SECRET_KEY',
+    getenv('RECAPTCHA_SECRET_KEY') ?: ''
+);
+
+define(
+    'FORCE_HTTPS',
+    filter_var(
+        getenv('FORCE_HTTPS') ?: 'false',
+        FILTER_VALIDATE_BOOLEAN
+    )
+);
+
 
 // SMTP, for account-activation email. For Gmail use an App Password, not
 // the account password: host smtp.gmail.com, port 587, secure 'tls'.
@@ -98,10 +122,16 @@ define('SMTP_USER', '');
 define('SMTP_PASS', '');
 define('SMTP_FROM', '');        // defaults to SMTP_USER when blank
 
+
+// Mailjet settings
+define('MAILJET_API_KEY', getenv('MAILJET_API_KEY') ?: '');
+define('MAILJET_SECRET_KEY', getenv('MAILJET_SECRET_KEY') ?: '');
+define('MAILJET_FROM_EMAIL', getenv('MAILJET_FROM_EMAIL') ?: '');
+
+
 // Set to true once the site is served over HTTPS. It turns on the Secure
 // flag for the session cookie; leaving it true on plain HTTP would stop
 // the cookie being sent at all, which is why it is not simply hard-coded.
-define('FORCE_HTTPS', false);
 
 // ---------------------------------------------------------------------
 // Application timezone
@@ -115,3 +145,4 @@ define('FORCE_HTTPS', false);
 // Set this to the timezone the database server runs in.
 // ---------------------------------------------------------------------
 define('APP_TIMEZONE', 'Asia/Manila');
+
